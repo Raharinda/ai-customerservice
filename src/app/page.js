@@ -1,5 +1,9 @@
-import Image from "next/image";
+import Image from 'next/image'
 
 export default function Home() {
-  return <div>AI Customer Service</div>;
+    return (
+        <div>
+            <div>AI Customer service</div>
+        </div>
+    )
 }
