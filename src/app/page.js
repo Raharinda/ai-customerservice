@@ -54,14 +54,13 @@ export default function Home() {
                                 Customer
                             </h2>
                             <p className='text-center'>
-                                Access AI-powered tools to analyze
-                                conversations, classify issues by urgency,
-                                understand customer sentiment, and get
-                                intelligent response suggestions.
+                                Submit your support requests and get help from
+                                our team. Track your conversations and receive
+                                timely responses to all your inquiries.
                             </p>
 
                             {/* Button */}
-                            <div className='mt-10 p-2 text-center bg-blue-500 rounded-xl text-white hover:bg-blue-700'>
+                            <div className='mt-14 p-2 text-center bg-blue-500 rounded-xl text-white hover:bg-blue-700'>
                                 <Link href='/customer'>
                                     Continue as Customer
                                 </Link>
@@ -85,13 +84,14 @@ export default function Home() {
                                 Support Agent
                             </h2>
                             <p className='text-center'>
-                                Submit your support requests and get help from
-                                our team. Track your conversations and receive
-                                timely responses to all your inquiries.
+                                Access AI-powered tools to analyze
+                                conversations, classify issues by urgency,
+                                understand customer sentiment, and get
+                                intelligent response suggestions.
                             </p>
 
                             {/* Button */}
-                            <div className='mt-16 p-2 text-center bg-blue-500 rounded-xl text-white hover:bg-blue-700'>
+                            <div className='mt-8 p-2 text-center bg-blue-500 rounded-xl text-white hover:bg-blue-700'>
                                 <Link href='/agent'>Continue as Agent</Link>
                             </div>
                         </article>
