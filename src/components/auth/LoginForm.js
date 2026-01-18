@@ -22,7 +22,9 @@ export default function LoginForm() {
     try {
       const result = await login(email, password);
       console.log('✅ Login result:', result);
-      router.push('/customer'); // Redirect setelah login
+      
+      // Redirect ke customer dashboard
+      router.push('/customer');
     } catch (err) {
       console.error('❌ Login form error:', err);
       setError(err.message || 'Login gagal. Silakan coba lagi.');
@@ -52,7 +54,7 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Customer Login</h2>
         
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -96,7 +98,7 @@ export default function LoginForm() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Loading...' : 'Login'}
+            {loading ? 'Loading...' : 'Login sebagai Customer'}
           </button>
         </form>
 
@@ -143,6 +145,15 @@ export default function LoginForm() {
             Daftar di sini
           </a>
         </p>
+
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-center text-sm text-gray-600">
+            Login sebagai Support Agent?{' '}
+            <a href="/agent" className="text-blue-600 hover:text-blue-700 font-medium">
+              Klik di sini
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

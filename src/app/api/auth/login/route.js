@@ -36,6 +36,11 @@ export async function POST(request) {
 
         console.log('✅ User found:', uid);
 
+        // Set role sebagai customer untuk login normal
+        if (!userData.role || userData.role === 'customer') {
+          userData.role = 'customer';
+        }
+
         // Cek apakah user punya password tersimpan di Firestore
         // Karena kita tidak bisa verifikasi password via Firebase Auth (EMAIL_PASSWORD_DISABLED)
         // kita perlu menyimpan hash password di Firestore saat register
