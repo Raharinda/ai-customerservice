@@ -4,12 +4,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { FiFilter } from 'react-icons/fi'
-import Image from 'next/image'
-import { useState } from 'react'
-import { IoSearchOutline } from 'react-icons/io5'
 
-export default function Agent() {
+export default function AgentDashboard() {
     const { user, logout } = useAuth()
     const router = useRouter()
 
@@ -17,6 +13,10 @@ export default function Agent() {
         // Redirect jika bukan agent
         if (user && user.role !== 'agent') {
             router.push('/customer')
+        }
+        // Redirect ke login agent jika tidak login
+        if (!user) {
+            router.push('/agent')
         }
     }, [user, router])
 
@@ -71,7 +71,7 @@ export default function Agent() {
                             <div className="space-y-2">
                                 <p>
                                     <span className="font-medium">Name:</span>{' '}
-                                    {user?.displayName}
+                                    {user?.displayName || user?.email}
                                 </p>
                                 <p>
                                     <span className="font-medium">Email:</span>{' '}
