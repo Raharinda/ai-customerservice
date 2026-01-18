@@ -5,8 +5,9 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   signInWithCustomToken,
+  signInWithPopup,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, googleProvider } from '@/lib/firebase';
 
 const AuthContext = createContext({});
 
@@ -128,11 +129,59 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Login with Google
+  const loginWithGoogle = async () => {
+    try {
+      console.log('🔐 Starting Google login');
+      
+      // Sign in dengan Google popup
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      
+      console.log('✅ Google sign-in successful:', firebaseUser.email);
+      
+      // Verifikasi user di backend
+      const idToken = await firebaseUser.getIdToken();
+      const response = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Verification failed');
+      }
+
+      console.log('✅ Google login verified');
+      return data;
+    } catch (error) {
+      console.error('❌ Google login error:', error);
+      
+      // Handle specific Google auth errors
+      if (error.code === 'auth/popup-closed-by-user') {
+        throw new Error('Login dibatalkan');
+      }
+      if (error.code === 'auth/popup-blocked') {
+        throw new Error('Popup diblokir. Izinkan popup untuk login dengan Google.');
+      }
+      if (error.code === 'auth/cancelled-popup-request') {
+        throw new Error('Login dibatalkan');
+      }
+      
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
     register,
     login,
+    loginWithGoogle,
     logout,
   };
 
