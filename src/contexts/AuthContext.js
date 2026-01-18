@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
-  signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   signInWithCustomToken,
@@ -72,20 +71,13 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('🔐 Starting login for:', email);
       
-      // Sign in dengan Firebase client
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('✅ Firebase auth successful');
-      
-      const idToken = await userCredential.user.getIdToken();
-      console.log('✅ ID Token obtained');
-
-      // Verifikasi dengan backend
+      // Login melalui backend API (tidak perlu Email/Password enabled di Firebase Console)
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -95,26 +87,30 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.error || 'Login failed');
       }
 
+      // Jika backend mengembalikan custom token, gunakan untuk sign in
+      if (data.customToken) {
+        console.log('🔑 Signing in with custom token');
+        await signInWithCustomToken(auth, data.customToken);
+        console.log('✅ Signed in with custom token');
+      }
+
       console.log('✅ Login successful');
       return data;
     } catch (error) {
       console.error('❌ Login error:', error);
       
       // Better error messages
-      if (error.code === 'auth/user-not-found') {
-        throw new Error('Email tidak terdaftar');
+      if (error.message.includes('Email atau password salah')) {
+        throw new Error('Email atau password salah');
       }
-      if (error.code === 'auth/wrong-password') {
-        throw new Error('Password salah');
+      if (error.message.includes('tidak terdaftar')) {
+        throw new Error('Email tidak terdaftar');
       }
       if (error.code === 'auth/invalid-email') {
         throw new Error('Format email tidak valid');
       }
       if (error.code === 'auth/too-many-requests') {
         throw new Error('Terlalu banyak percobaan login. Coba lagi nanti.');
-      }
-      if (error.code === 'auth/invalid-credential') {
-        throw new Error('Email atau password salah');
       }
       
       throw error;
