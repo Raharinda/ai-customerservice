@@ -6,9 +6,7 @@ import { useForm } from 'react-hook-form'
 
 export default function FormRequest() {
     const [open, setOpen] = useState(false)
-
     const { register, handleSubmit, formState } = useForm()
-
     const onSubmit = (data) => {
         console.log(data)
         setOpen(false)
@@ -61,14 +59,18 @@ export default function FormRequest() {
                             <select
                                 {...register('category', { required: true })}
                                 className='w-full rounded-lg bg-zinc-100 px-4 py-3 text-sm'
+                                defaultValue={''}
                             >
-                                <option value=''>Technical Issue</option>
+                                <option value='' disabled>
+                                    Select category
+                                </option>
+                                <option value='Technical'>
+                                    Technical Issue
+                                </option>
                                 <option value='billing'>
                                     Billing & Payment
                                 </option>
-                                <option value='technical'>
-                                    Feature Request
-                                </option>
+                                <option value='feature'>Feature Request</option>
                                 <option value='account'>Account Access</option>
                                 <option value='other'>Other</option>
                             </select>
