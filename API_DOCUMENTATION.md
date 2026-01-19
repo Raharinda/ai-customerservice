@@ -18,18 +18,23 @@ Untuk production, ganti dengan domain production Anda.
 
 1. [Overview](#overview)
 2. [Architecture](#architecture)
-3. [API Endpoints](#api-endpoints)
+3. [Authentication API Endpoints](#authentication-api-endpoints)
    - [Register (Email/Password)](#1-register-emailpassword)
    - [Customer Login](#2-customer-login)
    - [Agent Login](#3-agent-login-with-key)
    - [Login with Google](#4-login-with-google)
    - [Verify Token](#5-verify-token)
-4. [Environment Setup](#environment-setup)
-5. [Frontend Integration](#frontend-integration-examples)
-6. [Security](#security-best-practices)
-7. [Testing Guide](#testing-guide)
-8. [Troubleshooting](#troubleshooting)
-9. [Changelog](#changelog)
+4. [Ticketing System API Endpoints](#ticketing-system-api-endpoints)
+   - [Create Ticket](#6-create-ticket)
+   - [Get All Tickets](#7-get-all-tickets)
+   - [Send Message to Ticket](#8-send-message-to-ticket)
+   - [Get Ticket Messages](#9-get-ticket-messages)
+5. [Environment Setup](#environment-setup)
+6. [Frontend Integration](#frontend-integration-examples)
+7. [Security](#security-best-practices)
+8. [Testing Guide](#testing-guide)
+9. [Troubleshooting](#troubleshooting)
+10. [Changelog](#changelog)
 
 ---
 
@@ -1036,6 +1041,718 @@ authService.login('user@example.com', 'password123')
 
 ---
 
+## Ticketing System API Endpoints
+
+Sistem ticketing memungkinkan customer untuk membuat ticket support dan berkomunikasi dengan agent melalui pesan.
+
+### Overview
+
+**Struktur Database:**
+- **Collection `tickets`**: Menyimpan informasi ticket
+- **Subcollection `tickets/{ticketId}/messages`**: Menyimpan pesan-pesan dalam ticket
+
+**Status Ticket:**
+- `open` - Ticket baru dibuat
+- `in-progress` - Ticket sedang ditangani agent
+- `resolved` - Masalah sudah diselesaikan
+- `closed` - Ticket ditutup
+
+**Priority Levels:**
+- `low` - Pertanyaan umum
+- `medium` - Masalah biasa
+- `high` - Masalah penting
+- `urgent` - Sangat mendesak
+
+---
+
+## 6. Create Ticket
+
+Membuat ticket support baru dengan pesan pertama.
+
+### Endpoint
+```
+POST /api/tickets/create
+```
+
+### Authentication Required
+✅ **Yes** - Requires Bearer Token
+
+### Request Headers
+```json
+{
+  "Content-Type": "application/json",
+  "Authorization": "Bearer <Firebase_ID_Token>"
+}
+```
+
+### Request Body
+```json
+{
+  "subject": "Masalah login aplikasi",
+  "message": "Saya tidak bisa login ke aplikasi, muncul error authentication failed",
+  "priority": "high"
+}
+```
+
+### Request Body Parameters
+
+| Parameter | Type   | Required | Description                           |
+|-----------|--------|----------|---------------------------------------|
+| subject   | string | Yes      | Judul ticket (minimal 5 karakter)     |
+| message   | string | Yes      | Pesan awal (minimal 10 karakter)      |
+| priority  | string | No       | Priority level (default: "medium")    |
+
+**Priority Values:**
+- `low` - Pertanyaan umum, tidak mendesak
+- `medium` - Masalah biasa (default)
+- `high` - Masalah penting
+- `urgent` - Sangat mendesak
+
+### Success Response
+
+**Code:** `201 Created`
+
+```json
+{
+  "success": true,
+  "message": "Ticket berhasil dibuat",
+  "data": {
+    "ticketId": "abc123xyz",
+    "customerId": "uid123",
+    "customerName": "John Doe",
+    "customerEmail": "john@example.com",
+    "subject": "Masalah login aplikasi",
+    "priority": "high",
+    "status": "open",
+    "createdAt": "2026-01-20T10:30:00.000Z",
+    "updatedAt": "2026-01-20T10:30:00.000Z",
+    "assignedTo": null,
+    "messageCount": 1,
+    "lastMessageAt": "2026-01-20T10:30:00.000Z"
+  }
+}
+```
+
+### Error Responses
+
+**Subject atau message kosong**
+```json
+{
+  "error": "Subject dan message wajib diisi"
+}
+```
+**Code:** `400 Bad Request`
+
+**Subject terlalu pendek**
+```json
+{
+  "error": "Subject minimal 5 karakter"
+}
+```
+**Code:** `400 Bad Request`
+
+**Message terlalu pendek**
+```json
+{
+  "error": "Message minimal 10 karakter"
+}
+```
+**Code:** `400 Bad Request`
+
+**Unauthorized**
+```json
+{
+  "error": "Unauthorized - Token tidak valid"
+}
+```
+**Code:** `401 Unauthorized`
+
+### Frontend Example
+
+```javascript
+import { useAuth } from '@/contexts/AuthContext';
+
+const { getIdToken } = useAuth();
+
+async function createTicket(subject, message, priority = 'medium') {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch('/api/tickets/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        subject,
+        message,
+        priority,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal membuat ticket');
+    }
+
+    console.log('Ticket created:', data.data.ticketId);
+    return data.data;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Usage
+createTicket(
+  'Tidak bisa login',
+  'Saya tidak bisa login ke aplikasi, muncul error...',
+  'high'
+)
+  .then(ticket => console.log('Success:', ticket))
+  .catch(error => console.error('Failed:', error));
+```
+
+---
+
+## 7. Get All Tickets
+
+Mengambil daftar tickets milik user yang sedang login. Customer hanya bisa melihat tickets milik sendiri, sedangkan agent bisa melihat semua tickets dengan filter.
+
+### Endpoint
+```
+GET /api/tickets
+```
+
+### Authentication Required
+✅ **Yes** - Requires Bearer Token
+
+### Request Headers
+```json
+{
+  "Authorization": "Bearer <Firebase_ID_Token>"
+}
+```
+
+### Query Parameters (Agent Only)
+
+| Parameter | Type   | Required | Description                           |
+|-----------|--------|----------|---------------------------------------|
+| filter    | string | No       | Filter tickets (all/assigned/unassigned) |
+
+**Filter Values (Agent Only):**
+- `all` - Semua tickets (default)
+- `assigned` - Hanya tickets yang assigned ke agent
+- `unassigned` - Hanya tickets yang belum di-assign
+
+**Note:** Customer tidak bisa menggunakan filter, hanya melihat tickets milik sendiri.
+
+### Success Response (Customer)
+
+**Code:** `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "tickets": [
+      {
+        "ticketId": "abc123",
+        "customerId": "uid123",
+        "customerName": "John Doe",
+        "customerEmail": "john@example.com",
+        "subject": "Masalah login",
+        "priority": "high",
+        "status": "open",
+        "createdAt": "2026-01-20T10:30:00.000Z",
+        "updatedAt": "2026-01-20T11:00:00.000Z",
+        "assignedTo": null,
+        "messageCount": 3,
+        "lastMessageAt": "2026-01-20T11:00:00.000Z"
+      },
+      {
+        "ticketId": "xyz789",
+        "customerId": "uid123",
+        "customerName": "John Doe",
+        "customerEmail": "john@example.com",
+        "subject": "Fitur tidak berfungsi",
+        "priority": "medium",
+        "status": "in-progress",
+        "createdAt": "2026-01-19T15:20:00.000Z",
+        "updatedAt": "2026-01-20T09:00:00.000Z",
+        "assignedTo": "agent_uid_456",
+        "messageCount": 8,
+        "lastMessageAt": "2026-01-20T09:00:00.000Z"
+      }
+    ],
+    "totalTickets": 2,
+    "userRole": "customer"
+  }
+}
+```
+
+### Success Response (Agent)
+
+**Code:** `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "tickets": [
+      {
+        "ticketId": "abc123",
+        "customerId": "uid123",
+        "customerName": "John Doe",
+        "customerEmail": "john@example.com",
+        "subject": "Masalah login",
+        "priority": "high",
+        "status": "open",
+        "createdAt": "2026-01-20T10:30:00.000Z",
+        "updatedAt": "2026-01-20T11:00:00.000Z",
+        "assignedTo": null,
+        "messageCount": 3,
+        "lastMessageAt": "2026-01-20T11:00:00.000Z"
+      }
+      // ... more tickets
+    ],
+    "totalTickets": 25,
+    "userRole": "agent"
+  }
+}
+```
+
+### Frontend Example
+
+```javascript
+import { useAuth } from '@/contexts/AuthContext';
+
+const { getIdToken } = useAuth();
+
+// Customer - get my tickets
+async function getMyTickets() {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch('/api/tickets', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat tickets');
+    }
+
+    return data.data.tickets;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Agent - get tickets with filter
+async function getAgentTickets(filter = 'all') {
+  try {
+    const token = await getIdToken();
+    
+    const url = filter 
+      ? `/api/tickets?filter=${filter}`
+      : '/api/tickets';
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat tickets');
+    }
+
+    return data.data.tickets;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Usage
+getMyTickets()
+  .then(tickets => console.log('My tickets:', tickets))
+  .catch(error => console.error('Failed:', error));
+
+// Agent usage
+getAgentTickets('unassigned')
+  .then(tickets => console.log('Unassigned tickets:', tickets))
+  .catch(error => console.error('Failed:', error));
+```
+
+---
+
+## 8. Send Message to Ticket
+
+Mengirim pesan baru ke ticket yang sudah ada. Customer hanya bisa mengirim pesan ke tickets milik sendiri, agent bisa mengirim ke semua tickets.
+
+### Endpoint
+```
+POST /api/tickets/[ticketId]/messages
+```
+
+### Authentication Required
+✅ **Yes** - Requires Bearer Token
+
+### Request Headers
+```json
+{
+  "Content-Type": "application/json",
+  "Authorization": "Bearer <Firebase_ID_Token>"
+}
+```
+
+### URL Parameters
+
+| Parameter | Type   | Required | Description           |
+|-----------|--------|----------|-----------------------|
+| ticketId  | string | Yes      | ID ticket tujuan      |
+
+### Request Body
+```json
+{
+  "message": "Terima kasih atas laporannya, kami akan segera cek masalahnya..."
+}
+```
+
+### Request Body Parameters
+
+| Parameter | Type   | Required | Description                      |
+|-----------|--------|----------|----------------------------------|
+| message   | string | Yes      | Isi pesan (tidak boleh kosong)   |
+
+### Success Response
+
+**Code:** `201 Created`
+
+```json
+{
+  "success": true,
+  "message": "Pesan berhasil dikirim",
+  "data": {
+    "messageId": "msg123",
+    "ticketId": "abc123",
+    "senderId": "uid456",
+    "senderName": "Agent Smith",
+    "senderRole": "agent",
+    "message": "Terima kasih atas laporannya...",
+    "createdAt": "2026-01-20T11:00:00.000Z",
+    "isRead": false
+  }
+}
+```
+
+### Error Responses
+
+**Message kosong**
+```json
+{
+  "error": "Message tidak boleh kosong"
+}
+```
+**Code:** `400 Bad Request`
+
+**Ticket tidak ditemukan**
+```json
+{
+  "error": "Ticket tidak ditemukan"
+}
+```
+**Code:** `404 Not Found`
+
+**Tidak punya akses**
+```json
+{
+  "error": "Anda tidak memiliki akses ke ticket ini"
+}
+```
+**Code:** `403 Forbidden`
+
+### Frontend Example
+
+```javascript
+import { useAuth } from '@/contexts/AuthContext';
+
+const { getIdToken } = useAuth();
+
+async function sendMessage(ticketId, message) {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch(`/api/tickets/${ticketId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal mengirim pesan');
+    }
+
+    return data.data;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Usage
+sendMessage('abc123', 'Terima kasih atas bantuannya!')
+  .then(msg => console.log('Message sent:', msg))
+  .catch(error => console.error('Failed:', error));
+```
+
+---
+
+## 9. Get Ticket Messages
+
+Mengambil semua pesan dari sebuah ticket. Customer hanya bisa melihat pesan dari tickets milik sendiri, agent bisa melihat semua.
+
+### Endpoint
+```
+GET /api/tickets/[ticketId]/messages
+```
+
+### Authentication Required
+✅ **Yes** - Requires Bearer Token
+
+### Request Headers
+```json
+{
+  "Authorization": "Bearer <Firebase_ID_Token>"
+}
+```
+
+### URL Parameters
+
+| Parameter | Type   | Required | Description           |
+|-----------|--------|----------|-----------------------|
+| ticketId  | string | Yes      | ID ticket             |
+
+### Success Response
+
+**Code:** `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "ticketId": "abc123",
+    "ticketInfo": {
+      "subject": "Masalah login",
+      "status": "open",
+      "priority": "high",
+      "createdAt": "2026-01-20T10:30:00.000Z"
+    },
+    "messages": [
+      {
+        "messageId": "msg1",
+        "ticketId": "abc123",
+        "senderId": "uid123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "message": "Saya tidak bisa login ke aplikasi...",
+        "createdAt": "2026-01-20T10:30:00.000Z",
+        "isRead": true
+      },
+      {
+        "messageId": "msg2",
+        "ticketId": "abc123",
+        "senderId": "uid456",
+        "senderName": "Agent Smith",
+        "senderRole": "agent",
+        "message": "Terima kasih atas laporannya...",
+        "createdAt": "2026-01-20T10:45:00.000Z",
+        "isRead": false
+      },
+      {
+        "messageId": "msg3",
+        "ticketId": "abc123",
+        "senderId": "uid123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "message": "Sudah dicoba, masih error...",
+        "createdAt": "2026-01-20T11:00:00.000Z",
+        "isRead": false
+      }
+    ],
+    "totalMessages": 3
+  }
+}
+```
+
+### Error Responses
+
+**Ticket tidak ditemukan**
+```json
+{
+  "error": "Ticket tidak ditemukan"
+}
+```
+**Code:** `404 Not Found`
+
+**Tidak punya akses**
+```json
+{
+  "error": "Anda tidak memiliki akses ke ticket ini"
+}
+```
+**Code:** `403 Forbidden`
+
+### Frontend Example
+
+```javascript
+import { useAuth } from '@/contexts/AuthContext';
+
+const { getIdToken } = useAuth();
+
+async function getMessages(ticketId) {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch(`/api/tickets/${ticketId}/messages`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat pesan');
+    }
+
+    return data.data.messages;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Usage
+getMessages('abc123')
+  .then(messages => {
+    console.log('Ticket messages:', messages);
+    // Render messages in chat UI
+  })
+  .catch(error => console.error('Failed:', error));
+```
+
+### Complete Chat Component Example
+
+```javascript
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function TicketChat({ ticketId }) {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { getIdToken } = useAuth();
+
+  // Load messages saat component mount
+  useEffect(() => {
+    loadMessages();
+  }, [ticketId]);
+
+  const loadMessages = async () => {
+    try {
+      const token = await getIdToken();
+      const response = await fetch(`/api/tickets/${ticketId}/messages`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setMessages(data.data.messages);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    setLoading(true);
+    try {
+      const token = await getIdToken();
+      const response = await fetch(`/api/tickets/${ticketId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message: newMessage }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessages([...messages, data.data]);
+        setNewMessage('');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="chat-container">
+      <div className="messages">
+        {messages.map((msg) => (
+          <div
+            key={msg.messageId}
+            className={`message ${msg.senderRole}`}
+          >
+            <strong>{msg.senderName}</strong>
+            <p>{msg.message}</p>
+            <small>{new Date(msg.createdAt).toLocaleString()}</small>
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={sendMessage}>
+        <input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Tulis pesan..."
+          disabled={loading}
+        />
+        <button type="submit" disabled={loading || !newMessage.trim()}>
+          {loading ? 'Mengirim...' : 'Kirim'}
+        </button>
+      </form>
+    </div>
+  );
+}
+```
+
+---
+
 ## Environment Setup
 
 ### Backend Environment Variables
@@ -1201,6 +1918,21 @@ AGENT_KEY=<your-strong-random-key>
 - [ ] Token expired ditolak
 - [ ] User role ter-fetch dengan benar
 
+#### ✅ Ticketing System
+- [ ] Customer bisa membuat ticket baru
+- [ ] Subject dan message divalidasi dengan benar
+- [ ] Ticket tersimpan di Firestore dengan data lengkap
+- [ ] Pesan pertama otomatis dibuat
+- [ ] Customer bisa melihat semua tickets milik sendiri
+- [ ] Agent bisa melihat semua tickets
+- [ ] Agent bisa filter tickets (all/assigned/unassigned)
+- [ ] Customer bisa kirim pesan ke tickets milik sendiri
+- [ ] Agent bisa kirim pesan ke semua tickets
+- [ ] Customer tidak bisa kirim pesan ke tickets orang lain
+- [ ] Messages diurutkan berdasarkan waktu
+- [ ] Message count di ticket auto-update
+- [ ] Last message time di ticket auto-update
+
 #### ✅ Role-Based Access Control
 - [ ] Customer tidak bisa akses `/agent/dashboard`
 - [ ] Agent tidak bisa akses `/customer`
@@ -1267,6 +1999,114 @@ AGENT_KEY=<your-strong-random-key>
 2. Logout
 3. Login kembali melalui `/agent` dengan agent key
 4. Check Firestore: role harus berubah dari "customer" ke "agent"
+
+#### Scenario 4: Create Ticket (Customer)
+
+1. **Login sebagai customer** (dapatkan token)
+   ```bash
+   # Simpan token dari response login
+   TOKEN="your_firebase_token_here"
+   ```
+
+2. **Create ticket**
+   ```bash
+   curl -X POST http://localhost:3001/api/tickets/create \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $TOKEN" \
+     -d '{
+       "subject": "Masalah login aplikasi",
+       "message": "Saya tidak bisa login ke aplikasi, muncul error authentication failed",
+       "priority": "high"
+     }'
+   ```
+   Expected: `201 Created` dengan ticketId
+
+3. **Verify di Firestore**
+   - Check collection `tickets` → ticket baru muncul
+   - Check subcollection `messages` → pesan pertama ada
+
+#### Scenario 5: Get Tickets
+
+1. **Customer get their tickets**
+   ```bash
+   curl -X GET http://localhost:3001/api/tickets \
+     -H "Authorization: Bearer $CUSTOMER_TOKEN"
+   ```
+   Expected: `200 OK` dengan array tickets milik customer
+
+2. **Agent get all tickets**
+   ```bash
+   curl -X GET http://localhost:3001/api/tickets \
+     -H "Authorization: Bearer $AGENT_TOKEN"
+   ```
+   Expected: `200 OK` dengan semua tickets
+
+3. **Agent get unassigned tickets**
+   ```bash
+   curl -X GET "http://localhost:3001/api/tickets?filter=unassigned" \
+     -H "Authorization: Bearer $AGENT_TOKEN"
+   ```
+   Expected: `200 OK` dengan tickets yang belum di-assign
+
+#### Scenario 6: Send Message to Ticket
+
+1. **Customer send message**
+   ```bash
+   curl -X POST http://localhost:3001/api/tickets/abc123/messages \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $CUSTOMER_TOKEN" \
+     -d '{
+       "message": "Apakah sudah ada update untuk masalah saya?"
+     }'
+   ```
+   Expected: `201 Created`
+
+2. **Agent reply**
+   ```bash
+   curl -X POST http://localhost:3001/api/tickets/abc123/messages \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $AGENT_TOKEN" \
+     -d '{
+       "message": "Kami sedang mengecek masalahnya, mohon tunggu sebentar"
+     }'
+   ```
+   Expected: `201 Created`
+
+3. **Customer try to send to other customer ticket**
+   ```bash
+   curl -X POST http://localhost:3001/api/tickets/xyz789/messages \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $CUSTOMER_TOKEN" \
+     -d '{
+       "message": "Test message"
+     }'
+   ```
+   Expected: `403 Forbidden` (jika ticket bukan milik customer)
+
+#### Scenario 7: Get Ticket Messages
+
+1. **Get all messages from ticket**
+   ```bash
+   curl -X GET http://localhost:3001/api/tickets/abc123/messages \
+     -H "Authorization: Bearer $CUSTOMER_TOKEN"
+   ```
+   Expected: `200 OK` dengan array messages, sorted by createdAt
+
+2. **Verify message order**
+   - Messages diurutkan dari yang terlama (ascending)
+   - Setiap message punya sender info (name, role)
+
+#### Scenario 8: End-to-End Ticket Flow
+
+1. Customer login
+2. Customer buat ticket baru
+3. Customer kirim pesan kedua
+4. Agent login
+5. Agent lihat semua tickets
+6. Agent balas pesan customer
+7. Customer refresh dan lihat balasan agent
+8. Customer kirim pesan lagi
+9. Verify di Firestore: semua data tersimpan dengan benar
 
 ---
 
@@ -1402,6 +2242,19 @@ node -e "console.log(process.env.AGENT_KEY)"
 
 ## Changelog
 
+### Version 3.0.0 (2026-01-20)
+- ✅ **NEW**: Ticketing System API
+- ✅ **NEW**: Create ticket endpoint (`POST /api/tickets/create`)
+- ✅ **NEW**: Get tickets endpoint (`GET /api/tickets`)
+- ✅ **NEW**: Send message endpoint (`POST /api/tickets/[ticketId]/messages`)
+- ✅ **NEW**: Get messages endpoint (`GET /api/tickets/[ticketId]/messages`)
+- ✅ Firestore structure for tickets and messages
+- ✅ Role-based access control for tickets
+- ✅ Agent filter support (all/assigned/unassigned)
+- ✅ Complete documentation with examples
+- ✅ Test scenarios for ticketing API
+- ✅ Frontend integration examples
+
 ### Version 2.0.0 (2026-01-19)
 - ✅ **BREAKING**: Separated agent login to `/api/auth/agent/login`
 - ✅ **BREAKING**: Agent dashboard moved to `/agent/dashboard`
@@ -1433,9 +2286,11 @@ Jika ada pertanyaan atau issues terkait API ini, silakan hubungi:
 
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [Ticketing System Documentation](./TICKETS_API_DOCUMENTATION.md)
+- [Ticketing Setup Guide](./SETUP_TICKETING.md)
+- [Troubleshooting Guide](./TROUBLESHOOTING.md)
 - [Agent Key Setup Guide](./AGENT_KEY_SETUP.md)
-- [Testing Guide](./TESTING_GUIDE.md)
 
 ---
 
-**Last Updated**: January 19, 2026
+**Last Updated**: January 20, 2026
