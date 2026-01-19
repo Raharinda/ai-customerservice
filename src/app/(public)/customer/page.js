@@ -3,18 +3,134 @@
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function CustomerPage() {
-    const { user, logout } = useAuth();
+    const { user, logout, getIdToken } = useAuth();
     const router = useRouter();
+    const [tickets, setTickets] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    
+    // Form state
+    const [formData, setFormData] = useState({
+        subject: '',
+        message: '',
+        priority: 'medium',
+    });
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         // Redirect jika user adalah agent
         if (user && user.role === 'agent') {
             router.push('/agent');
         }
+        
+        // Load tickets saat component mount
+        if (user) {
+            loadTickets();
+        }
     }, [user, router]);
+
+    // Fungsi untuk load tickets
+    const loadTickets = async () => {
+        try {
+            setLoading(true);
+            setError('');
+            const token = await getIdToken();
+            
+            const response = await fetch('/api/tickets', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setTickets(data.data.tickets);
+            } else {
+                setError(data.error || 'Gagal memuat tickets');
+            }
+        } catch (err) {
+            console.error('Error loading tickets:', err);
+            setError('Gagal memuat tickets');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fungsi untuk submit ticket baru
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+        setSubmitting(true);
+
+        try {
+            const token = await getIdToken();
+            
+            const response = await fetch('/api/tickets/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSuccess('Ticket berhasil dibuat!');
+                setFormData({ subject: '', message: '', priority: 'medium' });
+                // Reload tickets
+                loadTickets();
+            } else {
+                setError(data.error || 'Gagal membuat ticket');
+            }
+        } catch (err) {
+            console.error('Error creating ticket:', err);
+            setError('Gagal membuat ticket');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Fungsi untuk format tanggal
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        return date.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
+    // Fungsi untuk mendapatkan warna badge status
+    const getStatusBadge = (status) => {
+        const badges = {
+            open: 'bg-blue-100 text-blue-800',
+            'in-progress': 'bg-yellow-100 text-yellow-800',
+            resolved: 'bg-green-100 text-green-800',
+            closed: 'bg-gray-100 text-gray-800',
+        };
+        return badges[status] || badges.open;
+    };
+
+    // Fungsi untuk mendapatkan warna badge priority
+    const getPriorityBadge = (priority) => {
+        const badges = {
+            low: 'bg-gray-100 text-gray-800',
+            medium: 'bg-blue-100 text-blue-800',
+            high: 'bg-orange-100 text-orange-800',
+            urgent: 'bg-red-100 text-red-800',
+        };
+        return badges[priority] || badges.medium;
+    };
 
     return (
         <ProtectedRoute>
@@ -46,11 +162,116 @@ export default function CustomerPage() {
                             </div>
                         </div>
 
-                        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h3 className="font-semibold mb-2">📝 Submit Support Request</h3>
-                            <p className="text-sm text-gray-600">
-                                Feature coming soon: Submit your support requests and get help from our team.
-                            </p>
+                        {/* Form untuk membuat ticket baru */}
+                        <div className="mt-6 border-t pt-6">
+                            <h2 className="text-xl font-semibold mb-4">📝 Buat Ticket Support Baru</h2>
+                            
+                            {error && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+                                    {error}
+                                </div>
+                            )}
+                            
+                            {success && (
+                                <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md">
+                                    {success}
+                                </div>
+                            )}
+                            
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Subject
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.subject}
+                                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Masukkan judul permasalahan (min. 5 karakter)"
+                                        required
+                                        minLength={5}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Priority
+                                    </label>
+                                    <select
+                                        value={formData.priority}
+                                        onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="low">Low - Pertanyaan umum</option>
+                                        <option value="medium">Medium - Masalah biasa</option>
+                                        <option value="high">High - Masalah penting</option>
+                                        <option value="urgent">Urgent - Sangat mendesak</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Pesan
+                                    </label>
+                                    <textarea
+                                        value={formData.message}
+                                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        rows="4"
+                                        placeholder="Jelaskan permasalahan Anda (min. 10 karakter)"
+                                        required
+                                        minLength={10}
+                                    />
+                                </div>
+                                
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+                                >
+                                    {submitting ? 'Mengirim...' : 'Kirim Ticket'}
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Daftar tickets */}
+                        <div className="mt-8 border-t pt-6">
+                            <h2 className="text-xl font-semibold mb-4">📋 Tickets Anda</h2>
+                            
+                            {loading ? (
+                                <p className="text-gray-600">Memuat tickets...</p>
+                            ) : tickets.length === 0 ? (
+                                <p className="text-gray-600">Belum ada ticket. Buat ticket pertama Anda di atas!</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {tickets.map((ticket) => (
+                                        <div
+                                            key={ticket.ticketId}
+                                            className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-semibold text-lg">{ticket.subject}</h3>
+                                                <div className="flex gap-2">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(ticket.status)}`}>
+                                                        {ticket.status}
+                                                    </span>
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityBadge(ticket.priority)}`}>
+                                                        {ticket.priority}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-gray-600 mb-2">
+                                                ID: {ticket.ticketId}
+                                            </p>
+                                            <div className="flex justify-between items-center text-sm text-gray-500">
+                                                <span>💬 {ticket.messageCount} pesan</span>
+                                                <span>🕐 {formatDate(ticket.createdAt)}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

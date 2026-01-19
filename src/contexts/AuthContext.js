@@ -263,6 +263,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Function untuk mendapatkan fresh ID token
+  const getIdToken = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No user logged in');
+      }
+      return await currentUser.getIdToken();
+    } catch (error) {
+      console.error('Error getting ID token:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -271,6 +285,7 @@ export const AuthProvider = ({ children }) => {
     loginAsAgent,
     loginWithGoogle,
     logout,
+    getIdToken, // Tambahkan method untuk get fresh token
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
