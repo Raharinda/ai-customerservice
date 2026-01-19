@@ -3,33 +3,45 @@
 import React, { useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 import { useForm } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function FormRequest() {
     const [open, setOpen] = useState(false)
-    const { register, handleSubmit, formState } = useForm()
+    const { register, handleSubmit } = useForm()
+    const { user } = useAuth()
+    const router = useRouter()
+
     const onSubmit = (data) => {
         console.log(data)
         setOpen(false)
     }
 
+    const handleOpen = () => {
+        if (!user) {
+            router.push('/login')
+            return
+        }
+        setOpen(true)
+    }
     return (
         <div>
             <button
                 onClick={() => setOpen(true)}
-                className='flex items-center gap-4 py-2 px-4 text-white bg-black rounded-xl text-sm'
+                className='flex items-center gap-4 py-2 px-4 text-white bg-blue-500 rounded-xl text-sm hover:bg-blue-700'
             >
                 <FaPlus size={14} />
                 New Request
             </button>
 
-            {/* OVERLAY */}
+            {/* Overlay */}
             {open && (
                 <div className='fixed inset-0 z-1 bg-black/50 flex items-center justify-center min-w-100'>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className='bg-white p-6 rounded-xl space-y-6'
                     >
-                        {/* FORM HEADER */}
+                        {/* Form Header */}
                         <div className='space-y-1'>
                             <h2 className='text-xl font-semibold'>
                                 Submit a Support Request
@@ -40,7 +52,7 @@ export default function FormRequest() {
                             </p>
                         </div>
 
-                        {/* FIELD */}
+                        {/* Form Body */}
                         <div className='space-y-1'>
                             <label className='text-sm font-medium'>
                                 Subject
@@ -90,7 +102,7 @@ export default function FormRequest() {
                         <div className='flex gap-4'>
                             <button
                                 type='submit'
-                                className='w-full rounded-lg bg-black py-3 text-white text-sm font-medium'
+                                className='w-full rounded-lg bg-blue-500 py-3 text-white text-sm font-medium hover:bg-blue-700'
                             >
                                 Submit Request
                             </button>
