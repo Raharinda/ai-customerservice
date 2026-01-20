@@ -1,11 +1,61 @@
 'use client'
-import LoginForm from '@/components/auth/LoginForm'
-import FormRequest from './_components/FormRequest'
+
+// pages/RequestPage.jsx (Main Container)
+import React, { useState } from 'react'
+import { useRequests } from '@/hooks/useRequests'
+import { useMessages } from '@/hooks/useMessages'
+import RequestList from '@/components/RequestList'
+import MessageDetail from '@/components/MessageDetail'
 import SearchBar from './_components/SearchBar'
 import AuthButton from '@/components/AuthButton'
+import FormRequest from './_components/FormRequest'
 import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
 
-export default function page() {
+export default function RequestPage() {
+    const [selectedRequest, setSelectedRequest] = useState(null)
+    const { requests, loading, error, refreshRequests } = useRequests()
+    const { user } = useAuth()
+    const {
+        messages,
+        loading: messagesLoading,
+        sending,
+        sendMessage,
+    } = useMessages(selectedRequest?.id)
+
+    const handleRequestCreated = (newRequestId) => {
+        refreshRequests()
+        setTimeout(() => {
+            const newRequest = requests.find((r) => r.id === newRequestId)
+            if (newRequest) {
+                setSelectedRequest(newRequest)
+            }
+        }, 500)
+    }
+
+    const handleSelectRequest = (request) => {
+        setSelectedRequest(request)
+    }
+
+    const handleBack = () => {
+        setSelectedRequest(null)
+        refreshRequests()
+    }
+
+    if (selectedRequest) {
+        return (
+            <MessageDetail
+                request={selectedRequest}
+                messages={messages}
+                loading={messagesLoading}
+                sending={sending}
+                onSendMessage={sendMessage}
+                onBack={handleBack}
+                currentUserId={user?.uid}
+            />
+        )
+    }
+
     return (
         <div>
             {/* Navbar */}
@@ -27,6 +77,27 @@ export default function page() {
             </div>
 
             <SearchBar />
+
+            <div className=' mx-auto p-4 h-screen flex flex-col'>
+                {!selectedRequest ? (
+                    <RequestList
+                        requests={requests}
+                        loading={loading}
+                        error={error}
+                        onRefresh={refreshRequests}
+                        onSelectRequest={handleSelectRequest}
+                    />
+                ) : (
+                    <MessageDetail
+                        request={selectedRequest}
+                        messages={messages}
+                        loading={messagesLoading}
+                        sending={sending}
+                        onSendMessage={sendMessage}
+                        onBack={handleBack}
+                    />
+                )}
+            </div>
         </div>
     )
 }
