@@ -29,6 +29,7 @@ Untuk production, ganti dengan domain production Anda.
    - [Get All Tickets](#7-get-all-tickets)
    - [Send Message to Ticket](#8-send-message-to-ticket)
    - [Get Ticket Messages](#9-get-ticket-messages)
+   - [Get Customer Messages (Agent Only)](#10-get-customer-messages-agent-only)
 5. [Environment Setup](#environment-setup)
 6. [Frontend Integration](#frontend-integration-examples)
 7. [Security](#security-best-practices)
@@ -1057,11 +1058,12 @@ Sistem ticketing memungkinkan customer untuk membuat ticket support dan berkomun
 - `resolved` - Masalah sudah diselesaikan
 - `closed` - Ticket ditutup
 
-**Priority Levels:**
-- `low` - Pertanyaan umum
-- `medium` - Masalah biasa
-- `high` - Masalah penting
-- `urgent` - Sangat mendesak
+**Category Types:**
+- `technical` - Masalah teknis/bug
+- `billing` - Pertanyaan pembayaran/tagihan
+- `general` - Pertanyaan umum (default)
+- `account` - Masalah akun/profil
+- `feature-request` - Permintaan fitur baru
 
 ---
 
@@ -1090,7 +1092,7 @@ POST /api/tickets/create
 {
   "subject": "Masalah login aplikasi",
   "message": "Saya tidak bisa login ke aplikasi, muncul error authentication failed",
-  "priority": "high"
+  "category": "technical"
 }
 ```
 
@@ -1100,13 +1102,14 @@ POST /api/tickets/create
 |-----------|--------|----------|---------------------------------------|
 | subject   | string | Yes      | Judul ticket (minimal 5 karakter)     |
 | message   | string | Yes      | Pesan awal (minimal 10 karakter)      |
-| priority  | string | No       | Priority level (default: "medium")    |
+| category  | string | No       | Category type (default: "general")    |
 
-**Priority Values:**
-- `low` - Pertanyaan umum, tidak mendesak
-- `medium` - Masalah biasa (default)
-- `high` - Masalah penting
-- `urgent` - Sangat mendesak
+**Category Values:**
+- `technical` - Masalah teknis/bug
+- `billing` - Pertanyaan pembayaran/tagihan
+- `general` - Pertanyaan umum (default)
+- `account` - Masalah akun/profil
+- `feature-request` - Permintaan fitur baru
 
 ### Success Response
 
@@ -1122,7 +1125,7 @@ POST /api/tickets/create
     "customerName": "John Doe",
     "customerEmail": "john@example.com",
     "subject": "Masalah login aplikasi",
-    "priority": "high",
+    "category": "technical",
     "status": "open",
     "createdAt": "2026-01-20T10:30:00.000Z",
     "updatedAt": "2026-01-20T10:30:00.000Z",
@@ -1174,7 +1177,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const { getIdToken } = useAuth();
 
-async function createTicket(subject, message, priority = 'medium') {
+async function createTicket(subject, message, category = 'general') {
   try {
     const token = await getIdToken();
     
@@ -1187,7 +1190,7 @@ async function createTicket(subject, message, priority = 'medium') {
       body: JSON.stringify({
         subject,
         message,
-        priority,
+        category,
       }),
     });
 
@@ -1209,7 +1212,7 @@ async function createTicket(subject, message, priority = 'medium') {
 createTicket(
   'Tidak bisa login',
   'Saya tidak bisa login ke aplikasi, muncul error...',
-  'high'
+  'technical'
 )
   .then(ticket => console.log('Success:', ticket))
   .catch(error => console.error('Failed:', error));
@@ -1753,6 +1756,487 @@ export default function TicketChat({ ticketId }) {
 
 ---
 
+## 10. Get Customer Messages (Agent Only)
+
+Endpoint khusus untuk support agent mengambil semua pesan dari customer. Agent dapat memfilter berdasarkan status, ticket, atau customer tertentu.
+
+### Endpoint
+```
+GET /api/agent/messages
+```
+
+### Authentication Required
+✅ **Yes** - Requires Bearer Token (Agent Role Only)
+
+### Request Headers
+```json
+{
+  "Authorization": "Bearer <Firebase_ID_Token>"
+}
+```
+
+### Query Parameters
+
+| Parameter  | Type   | Required | Description                                    |
+|------------|--------|----------|------------------------------------------------|
+| filter     | string | No       | Filter messages: 'all', 'unread', 'today'     |
+| ticketId   | string | No       | Filter by specific ticket ID                   |
+| customerId | string | No       | Filter by specific customer ID                 |
+| limit      | number | No       | Max messages to return (default: 50)           |
+
+**Filter Values:**
+- `all` - Semua pesan dari customer (default)
+- `unread` - Hanya pesan yang belum dibaca
+- `today` - Pesan hari ini saja
+
+### Success Response
+
+**Code:** `200 OK`
+
+**Example 1: All customer messages**
+```json
+{
+  "success": true,
+  "data": {
+    "messages": [
+      {
+        "messageId": "msg1",
+        "ticketId": "ticket123",
+        "ticketSubject": "Masalah login",
+        "ticketStatus": "open",
+        "ticketCategory": "technical",
+        "senderId": "customer_uid_123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "senderEmail": "john@example.com",
+        "message": "Saya tidak bisa login ke aplikasi...",
+        "createdAt": "2026-01-20T14:30:00.000Z",
+        "isRead": false
+      },
+      {
+        "messageId": "msg2",
+        "ticketId": "ticket456",
+        "ticketSubject": "Error saat checkout",
+        "ticketStatus": "in-progress",
+        "ticketCategory": "billing",
+        "senderId": "customer_uid_456",
+        "senderName": "Jane Smith",
+        "senderRole": "customer",
+        "senderEmail": "jane@example.com",
+        "message": "Muncul error 500 saat checkout...",
+        "createdAt": "2026-01-20T13:15:00.000Z",
+        "isRead": true
+      }
+    ],
+    "totalMessages": 2,
+    "filter": "all",
+    "ticketId": null,
+    "customerId": null
+  }
+}
+```
+
+**Example 2: Unread messages only**
+```
+GET /api/agent/messages?filter=unread
+```
+
+```json
+{
+  "success": true,
+  "data": {
+    "messages": [
+      {
+        "messageId": "msg1",
+        "ticketId": "ticket123",
+        "ticketSubject": "Masalah login",
+        "ticketStatus": "open",
+        "ticketCategory": "technical",
+        "senderId": "customer_uid_123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "message": "Saya tidak bisa login...",
+        "createdAt": "2026-01-20T14:30:00.000Z",
+        "isRead": false
+      }
+    ],
+    "totalMessages": 1,
+    "filter": "unread",
+    "ticketId": null,
+    "customerId": null
+  }
+}
+```
+
+**Example 3: Messages from specific ticket**
+```
+GET /api/agent/messages?ticketId=ticket123
+```
+
+```json
+{
+  "success": true,
+  "data": {
+    "messages": [
+      {
+        "messageId": "msg1",
+        "ticketId": "ticket123",
+        "senderId": "customer_uid_123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "message": "Saya tidak bisa login ke aplikasi...",
+        "createdAt": "2026-01-20T14:30:00.000Z",
+        "isRead": false
+      },
+      {
+        "messageId": "msg3",
+        "ticketId": "ticket123",
+        "senderId": "customer_uid_123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "message": "Sudah dicoba, masih error...",
+        "createdAt": "2026-01-20T12:00:00.000Z",
+        "isRead": true
+      }
+    ],
+    "totalMessages": 2,
+    "filter": "all",
+    "ticketId": "ticket123",
+    "customerId": null
+  }
+}
+```
+
+**Example 4: Messages from specific customer**
+```
+GET /api/agent/messages?customerId=customer_uid_123&limit=10
+```
+
+### Error Responses
+
+**Not an agent**
+```json
+{
+  "error": "Forbidden - Hanya agent yang dapat mengakses endpoint ini"
+}
+```
+**Code:** `403 Forbidden`
+
+**Unauthorized**
+```json
+{
+  "error": "Unauthorized - Token tidak valid"
+}
+```
+**Code:** `401 Unauthorized`
+
+**User not found**
+```json
+{
+  "error": "User tidak ditemukan"
+}
+```
+**Code:** `404 Not Found`
+
+### Frontend Example
+
+```javascript
+import { useAuth } from '@/contexts/AuthContext';
+
+const { getIdToken } = useAuth();
+
+// Get all customer messages
+async function getAllCustomerMessages() {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch('/api/agent/messages', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat pesan');
+    }
+
+    return data.data.messages;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Get unread customer messages
+async function getUnreadMessages() {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch('/api/agent/messages?filter=unread', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat pesan');
+    }
+
+    return data.data.messages;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Get messages from specific ticket
+async function getTicketMessages(ticketId) {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch(`/api/agent/messages?ticketId=${ticketId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat pesan');
+    }
+
+    return data.data.messages;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Get messages from specific customer
+async function getCustomerMessages(customerId, limit = 50) {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch(
+      `/api/agent/messages?customerId=${customerId}&limit=${limit}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat pesan');
+    }
+
+    return data.data.messages;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+
+// Get today's messages
+async function getTodayMessages() {
+  try {
+    const token = await getIdToken();
+    
+    const response = await fetch('/api/agent/messages?filter=today', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal memuat pesan');
+    }
+
+    return data.data.messages;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+}
+```
+
+### Complete Agent Dashboard Component Example
+
+```javascript
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function AgentMessagesDashboard() {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [unreadCount, setUnreadCount] = useState(0);
+  const { getIdToken } = useAuth();
+
+  useEffect(() => {
+    loadMessages();
+  }, [filter]);
+
+  const loadMessages = async () => {
+    setLoading(true);
+    try {
+      const token = await getIdToken();
+      const url = `/api/agent/messages?filter=${filter}`;
+      
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMessages(data.data.messages);
+        
+        // Count unread messages
+        const unread = data.data.messages.filter(m => !m.isRead).length;
+        setUnreadCount(unread);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+  };
+
+  return (
+    <div className="agent-dashboard">
+      <div className="dashboard-header">
+        <h1>Customer Messages</h1>
+        <div className="unread-badge">
+          {unreadCount} Unread
+        </div>
+      </div>
+
+      <div className="filter-buttons">
+        <button
+          onClick={() => handleFilterChange('all')}
+          className={filter === 'all' ? 'active' : ''}
+        >
+          All Messages
+        </button>
+        <button
+          onClick={() => handleFilterChange('unread')}
+          className={filter === 'unread' ? 'active' : ''}
+        >
+          Unread
+        </button>
+        <button
+          onClick={() => handleFilterChange('today')}
+          className={filter === 'today' ? 'active' : ''}
+        >
+          Today
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="loading">Loading messages...</div>
+      ) : (
+        <div className="messages-list">
+          {messages.length === 0 ? (
+            <div className="no-messages">No messages found</div>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg.messageId}
+                className={`message-card ${!msg.isRead ? 'unread' : ''}`}
+              >
+                <div className="message-header">
+                  <div className="customer-info">
+                    <strong>{msg.senderName}</strong>
+                    <span className="email">{msg.senderEmail}</span>
+                  </div>
+                  <div className="ticket-info">
+                    <span className={`category ${msg.ticketCategory}`}>
+                      {msg.ticketCategory}
+                    </span>
+                    <span className={`status ${msg.ticketStatus}`}>
+                      {msg.ticketStatus}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="ticket-subject">
+                  📋 {msg.ticketSubject}
+                </div>
+                
+                <div className="message-content">
+                  {msg.message}
+                </div>
+                
+                <div className="message-footer">
+                  <span className="timestamp">
+                    {new Date(msg.createdAt).toLocaleString()}
+                  </span>
+                  <a
+                    href={`/agent/tickets/${msg.ticketId}`}
+                    className="view-ticket"
+                  >
+                    View Full Ticket →
+                  </a>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Use Cases
+
+**1. Agent Inbox Dashboard**
+- Display all unread customer messages
+- Sort by priority and timestamp
+- Quick access to ticket details
+
+**2. Customer Support Monitoring**
+- Track response times
+- Identify high-priority issues
+- Monitor today's customer inquiries
+
+**3. Ticket Management**
+- Filter messages by specific ticket
+- Review customer communication history
+- Assign tickets to agents
+
+**4. Customer Relationship Management**
+- View all messages from specific customer
+- Track customer interaction history
+- Identify repeat customers or issues
+
+### Important Notes
+
+1. **Agent Only**: Endpoint hanya dapat diakses oleh user dengan role 'agent'
+2. **Customer Messages Only**: Hanya menampilkan pesan yang dikirim oleh customer (senderRole: 'customer')
+3. **Performance**: Default limit adalah 50 messages untuk optimasi
+4. **Real-time**: Untuk real-time updates, consider implementing polling atau WebSocket
+5. **Read Status**: Messages memiliki `isRead` flag untuk tracking
+6. **Sorting**: Messages diurutkan dari terbaru ke terlama (descending)
+
+---
+
 ## Environment Setup
 
 ### Backend Environment Variables
@@ -1933,6 +2417,18 @@ AGENT_KEY=<your-strong-random-key>
 - [ ] Message count di ticket auto-update
 - [ ] Last message time di ticket auto-update
 
+#### ✅ Agent Messages Endpoint
+- [ ] Agent bisa mengambil semua pesan customer
+- [ ] Filter 'all' menampilkan semua pesan
+- [ ] Filter 'unread' hanya menampilkan pesan belum dibaca
+- [ ] Filter 'today' hanya menampilkan pesan hari ini
+- [ ] Filter by ticketId berfungsi dengan benar
+- [ ] Filter by customerId berfungsi dengan benar
+- [ ] Limit parameter membatasi jumlah messages
+- [ ] Customer tidak bisa akses endpoint ini
+- [ ] Messages include ticket information (subject, status, priority)
+- [ ] Messages diurutkan dari terbaru ke terlama
+
 #### ✅ Role-Based Access Control
 - [ ] Customer tidak bisa akses `/agent/dashboard`
 - [ ] Agent tidak bisa akses `/customer`
@@ -2108,6 +2604,56 @@ AGENT_KEY=<your-strong-random-key>
 8. Customer kirim pesan lagi
 9. Verify di Firestore: semua data tersimpan dengan benar
 
+#### Scenario 9: Agent Get Customer Messages
+
+1. **Agent get all customer messages**
+   ```bash
+   curl -X GET http://localhost:3001/api/agent/messages \
+     -H "Authorization: Bearer $AGENT_TOKEN"
+   ```
+   Expected: `200 OK` dengan array messages dari semua customer
+
+2. **Agent get unread messages**
+   ```bash
+   curl -X GET "http://localhost:3001/api/agent/messages?filter=unread" \
+     -H "Authorization: Bearer $AGENT_TOKEN"
+   ```
+   Expected: `200 OK` dengan hanya messages yang isRead = false
+
+3. **Agent get today's messages**
+   ```bash
+   curl -X GET "http://localhost:3001/api/agent/messages?filter=today" \
+     -H "Authorization: Bearer $AGENT_TOKEN"
+   ```
+   Expected: `200 OK` dengan messages hari ini saja
+
+4. **Agent get messages from specific ticket**
+   ```bash
+   curl -X GET "http://localhost:3001/api/agent/messages?ticketId=abc123" \
+     -H "Authorization: Bearer $AGENT_TOKEN"
+   ```
+   Expected: `200 OK` dengan messages dari ticket abc123
+
+5. **Agent get messages from specific customer**
+   ```bash
+   curl -X GET "http://localhost:3001/api/agent/messages?customerId=customer_uid_123&limit=10" \
+     -H "Authorization: Bearer $AGENT_TOKEN"
+   ```
+   Expected: `200 OK` dengan max 10 messages dari customer tersebut
+
+6. **Customer try to access agent endpoint**
+   ```bash
+   curl -X GET http://localhost:3001/api/agent/messages \
+     -H "Authorization: Bearer $CUSTOMER_TOKEN"
+   ```
+   Expected: `403 Forbidden` dengan error "Hanya agent yang dapat mengakses endpoint ini"
+
+7. **Verify message structure**
+   - Each message harus punya: messageId, ticketId, senderId, senderName, senderRole, message, createdAt, isRead
+   - Jika bukan dari ticketId spesifik, harus ada: ticketSubject, ticketStatus, ticketCategory
+   - senderRole harus selalu 'customer'
+   - Messages sorted descending by createdAt
+
 ---
 
 ## Troubleshooting
@@ -2242,6 +2788,15 @@ node -e "console.log(process.env.AGENT_KEY)"
 
 ## Changelog
 
+### Version 3.1.0 (2026-01-20)
+- ✅ **NEW**: Agent Messages Endpoint (`GET /api/agent/messages`)
+- ✅ Agent dapat mengambil semua pesan dari customer
+- ✅ Filter support: all, unread, today
+- ✅ Filter by ticketId atau customerId
+- ✅ Customizable limit untuk pagination
+- ✅ Complete dashboard component examples
+- ✅ Updated documentation with use cases
+
 ### Version 3.0.0 (2026-01-20)
 - ✅ **NEW**: Ticketing System API
 - ✅ **NEW**: Create ticket endpoint (`POST /api/tickets/create`)
@@ -2271,6 +2826,734 @@ node -e "console.log(process.env.AGENT_KEY)"
 - ✅ Token verification endpoint
 - ✅ Comprehensive error handling
 - ✅ Frontend integration examples
+
+---
+
+## GET Methods Guide - Panduan Lengkap Mendapatkan Data
+
+Section ini menjelaskan **semua method GET yang tersedia**, cara menggunakannya, dan **kapan menggunakan API mana** untuk mendapatkan data yang Anda butuhkan.
+
+---
+
+### 📋 Overview Semua GET Endpoints
+
+| Endpoint | Authentication | Role | Description | Use Case |
+|----------|----------------|------|-------------|----------|
+| `GET /api/tickets` | ✅ Required | Customer/Agent | Mendapatkan daftar tickets | Menampilkan semua tickets user |
+| `GET /api/tickets/[ticketId]/messages` | ✅ Required | Customer/Agent | Mendapatkan pesan dalam ticket | Chat/conversation view |
+| `GET /api/agent/messages` | ✅ Required | Agent Only | Mendapatkan semua pesan customer | Agent inbox/dashboard |
+
+---
+
+### 1️⃣ GET All Tickets - `/api/tickets`
+
+**🎯 Tujuan**: Mendapatkan daftar tickets milik user yang login
+
+**👤 Siapa yang bisa akses**:
+- **Customer**: Hanya tickets milik sendiri
+- **Agent**: Semua tickets (dengan filter)
+
+#### Method GET Tanpa Parameter (Customer)
+
+**Kapan Digunakan**:
+- Menampilkan daftar tickets di dashboard customer
+- Melihat history semua tickets yang pernah dibuat
+- Monitoring status tickets
+
+**Cara Pakai**:
+
+```bash
+# Browser
+http://localhost:3000/api/tickets
+
+# cURL
+curl http://localhost:3000/api/tickets
+
+# JavaScript/Fetch
+fetch('http://localhost:3000/api/tickets')
+  .then(res => res.json())
+  .then(data => console.log(data.data.tickets))
+```
+
+**Response Format**:
+```json
+{
+  "success": true,
+  "data": {
+    "tickets": [
+      {
+        "ticketId": "abc123",
+        "customerId": "uid123",
+        "customerName": "John Doe",
+        "customerEmail": "john@example.com",
+        "subject": "Masalah login",
+        "priority": "high",
+        "status": "open",
+        "createdAt": "2026-01-20T10:30:00.000Z",
+        "updatedAt": "2026-01-20T11:00:00.000Z",
+        "assignedTo": null,
+        "messageCount": 3,
+        "lastMessageAt": "2026-01-20T11:00:00.000Z"
+      }
+    ],
+    "totalTickets": 1,
+    "userRole": "customer"
+  }
+}
+```
+
+**Data yang Didapat**:
+- ✅ `ticketId` - ID unik ticket (untuk fetch messages)
+- ✅ `subject` - Judul ticket
+- ✅ `status` - Status (open/in-progress/resolved/closed)
+- ✅ `category` - Category type (technical/billing/general/account/feature-request)
+- ✅ `messageCount` - Jumlah pesan dalam ticket
+- ✅ `lastMessageAt` - Timestamp pesan terakhir
+- ✅ `assignedTo` - Agent yang handle (jika sudah di-assign)
+
+#### Method GET Dengan Filter (Agent)
+
+**Kapan Digunakan (Agent Only)**:
+- Melihat semua tickets yang masuk
+- Filter tickets yang sudah/belum di-assign
+- Filter tickets yang di-handle sendiri
+
+**Cara Pakai**:
+
+```bash
+# Semua tickets
+curl "http://localhost:3000/api/tickets?filter=all"
+
+# Tickets yang sudah di-assign
+curl "http://localhost:3000/api/tickets?filter=assigned"
+
+# Tickets yang belum di-assign
+curl "http://localhost:3000/api/tickets?filter=unassigned"
+```
+
+**Query Parameters (Agent)**:
+- `filter=all` - Semua tickets (default)
+- `filter=assigned` - Hanya tickets assigned ke agent
+- `filter=unassigned` - Hanya tickets yang belum di-assign
+
+**JavaScript Example (Agent)**:
+```javascript
+// Fetch all tickets
+async function getAllTickets() {
+  const response = await fetch('/api/tickets?filter=all');
+  const data = await response.json();
+  return data.data.tickets;
+}
+
+// Fetch unassigned tickets (untuk queue)
+async function getUnassignedTickets() {
+  const response = await fetch('/api/tickets?filter=unassigned');
+  const data = await response.json();
+  return data.data.tickets;
+}
+```
+
+---
+
+### 2️⃣ GET Ticket Messages - `/api/tickets/[ticketId]/messages`
+
+**🎯 Tujuan**: Mendapatkan semua pesan dalam sebuah ticket
+
+**👤 Siapa yang bisa akses**:
+- **Customer**: Hanya tickets milik sendiri
+- **Agent**: Semua tickets
+
+**Kapan Digunakan**:
+- Menampilkan chat/conversation dalam ticket
+- Melihat history komunikasi customer-agent
+- Load messages saat user klik ticket
+
+#### Cara Pakai
+
+**Step 1**: Dapatkan `ticketId` dari endpoint `/api/tickets`
+
+```javascript
+// Ambil tickets dulu
+const ticketsResponse = await fetch('/api/tickets');
+const ticketsData = await ticketsResponse.json();
+const firstTicket = ticketsData.data.tickets[0];
+const ticketId = firstTicket.ticketId; // Simpan ticketId ini
+```
+
+**Step 2**: Fetch messages dengan ticketId
+
+```bash
+# Browser (ganti [ticketId] dengan ID sebenarnya)
+http://localhost:3000/api/tickets/abc123/messages
+
+# cURL
+curl http://localhost:3000/api/tickets/abc123/messages
+
+# JavaScript/Fetch
+const ticketId = 'abc123';
+fetch(`http://localhost:3000/api/tickets/${ticketId}/messages`)
+  .then(res => res.json())
+  .then(data => console.log(data.data.messages))
+```
+
+**Response Format**:
+```json
+{
+  "success": true,
+  "data": {
+    "ticketId": "abc123",
+    "ticketInfo": {
+      "subject": "Masalah login",
+      "status": "open",
+      "priority": "high",
+      "createdAt": "2026-01-20T10:30:00.000Z"
+    },
+    "messages": [
+      {
+        "messageId": "msg1",
+        "ticketId": "abc123",
+        "senderId": "uid123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "message": "Saya tidak bisa login...",
+        "createdAt": "2026-01-20T10:30:00.000Z",
+        "isRead": true
+      },
+      {
+        "messageId": "msg2",
+        "ticketId": "abc123",
+        "senderId": "agent_uid_456",
+        "senderName": "Agent Smith",
+        "senderRole": "agent",
+        "message": "Terima kasih atas laporannya...",
+        "createdAt": "2026-01-20T10:45:00.000Z",
+        "isRead": false
+      }
+    ],
+    "totalMessages": 2
+  }
+}
+```
+
+**Data yang Didapat**:
+- ✅ `ticketInfo` - Informasi ticket (subject, status, priority)
+- ✅ `messages[]` - Array semua pesan
+- ✅ `senderRole` - Role pengirim (customer/agent)
+- ✅ `senderName` - Nama pengirim
+- ✅ `message` - Isi pesan
+- ✅ `createdAt` - Timestamp pengiriman
+- ✅ `isRead` - Status sudah dibaca atau belum
+
+**Complete Example - Chat Component**:
+```javascript
+async function loadTicketChat(ticketId) {
+  try {
+    // Fetch messages
+    const response = await fetch(`/api/tickets/${ticketId}/messages`);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error);
+    }
+    
+    // Tampilkan ticket info
+    console.log('Subject:', data.data.ticketInfo.subject);
+    console.log('Status:', data.data.ticketInfo.status);
+    
+    // Loop messages untuk chat UI
+    data.data.messages.forEach(msg => {
+      console.log(`[${msg.senderRole}] ${msg.senderName}: ${msg.message}`);
+    });
+    
+    return data.data.messages;
+  } catch (error) {
+    console.error('Error loading chat:', error);
+  }
+}
+
+// Usage
+loadTicketChat('abc123');
+```
+
+---
+
+### 3️⃣ GET Agent Messages - `/api/agent/messages` (Agent Only)
+
+**🎯 Tujuan**: Mendapatkan semua pesan dari customer (agent view)
+
+**👤 Siapa yang bisa akses**: **Agent Only** (role: agent)
+
+**Kapan Digunakan**:
+- Agent inbox/dashboard
+- Monitoring unread messages
+- Melihat pesan hari ini
+- Track customer communication
+- Filter pesan per ticket/customer
+
+#### 3.1 GET All Customer Messages (Default)
+
+**Kapan Digunakan**:
+- Load agent inbox untuk pertama kali
+- Menampilkan semua pesan yang masuk dari customer
+- Overview komunikasi
+
+```bash
+# Browser
+http://localhost:3000/api/agent/messages
+
+# cURL
+curl http://localhost:3000/api/agent/messages
+
+# JavaScript
+fetch('/api/agent/messages')
+  .then(res => res.json())
+  .then(data => console.log(data.data.messages))
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "messages": [
+      {
+        "messageId": "msg1",
+        "ticketId": "ticket123",
+        "ticketSubject": "Masalah login",
+        "ticketStatus": "open",
+        "ticketCategory": "technical",
+        "senderId": "customer_uid_123",
+        "senderName": "John Doe",
+        "senderRole": "customer",
+        "senderEmail": "john@example.com",
+        "message": "Saya tidak bisa login...",
+        "createdAt": "2026-01-20T14:30:00.000Z",
+        "isRead": false
+      }
+    ],
+    "totalMessages": 1,
+    "filter": "all",
+    "ticketId": null,
+    "customerId": null
+  }
+}
+```
+
+#### 3.2 GET Unread Messages
+
+**Kapan Digunakan**:
+- Notification badge (unread count)
+- Priority inbox (messages belum dibaca)
+- Real-time monitoring
+
+```bash
+# cURL
+curl "http://localhost:3000/api/agent/messages?filter=unread"
+
+# JavaScript
+async function getUnreadMessages() {
+  const response = await fetch('/api/agent/messages?filter=unread');
+  const data = await response.json();
+  console.log('Unread:', data.data.totalMessages);
+  return data.data.messages;
+}
+```
+
+#### 3.3 GET Today's Messages
+
+**Kapan Digunakan**:
+- Daily dashboard
+- Monitoring aktivitas hari ini
+- Daily report
+
+```bash
+# cURL
+curl "http://localhost:3000/api/agent/messages?filter=today"
+
+# JavaScript
+async function getTodayMessages() {
+  const response = await fetch('/api/agent/messages?filter=today');
+  const data = await response.json();
+  return data.data.messages;
+}
+```
+
+#### 3.4 GET Messages from Specific Ticket
+
+**Kapan Digunakan**:
+- Melihat semua pesan customer dalam ticket tertentu
+- Similar dengan `/api/tickets/[ticketId]/messages` tapi khusus customer messages saja
+
+```bash
+# cURL
+curl "http://localhost:3000/api/agent/messages?ticketId=abc123"
+
+# JavaScript
+async function getTicketCustomerMessages(ticketId) {
+  const response = await fetch(`/api/agent/messages?ticketId=${ticketId}`);
+  const data = await response.json();
+  return data.data.messages;
+}
+```
+
+#### 3.5 GET Messages from Specific Customer
+
+**Kapan Digunakan**:
+- Melihat history komunikasi dengan customer tertentu
+- Customer profile view
+- Track customer interaction
+
+```bash
+# cURL
+curl "http://localhost:3000/api/agent/messages?customerId=uid123&limit=10"
+
+# JavaScript
+async function getCustomerHistory(customerId, limit = 50) {
+  const url = `/api/agent/messages?customerId=${customerId}&limit=${limit}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return data.data.messages;
+}
+```
+
+#### 3.6 Kombinasi Filter
+
+```javascript
+// Unread messages hari ini
+fetch('/api/agent/messages?filter=unread&filter=today')
+
+// Messages dari ticket tertentu, max 20
+fetch('/api/agent/messages?ticketId=abc123&limit=20')
+
+// Messages dari customer tertentu, max 10, unread
+fetch('/api/agent/messages?customerId=uid123&limit=10&filter=unread')
+```
+
+---
+
+### 🗺️ Decision Flow - API Mana yang Harus Dipanggil?
+
+Gunakan decision tree ini untuk memilih endpoint yang tepat:
+
+```
+📌 Apa yang ingin kamu dapatkan?
+
+┌─ Daftar Tickets
+│  ├─ Role: Customer
+│  │  └─ GET /api/tickets
+│  │     → Mendapatkan semua tickets milik sendiri
+│  │
+│  └─ Role: Agent
+│     └─ GET /api/tickets?filter=...
+│        ├─ filter=all → Semua tickets
+│        ├─ filter=assigned → Tickets yang di-handle sendiri
+│        └─ filter=unassigned → Tickets yang belum di-assign
+│
+├─ Pesan dalam Ticket Tertentu
+│  ├─ Sudah tahu ticketId?
+│  │  ├─ Ya → GET /api/tickets/[ticketId]/messages
+│  │  │     → Mendapatkan semua pesan (customer + agent)
+│  │  │
+│  │  └─ Tidak → GET /api/tickets dulu untuk dapat ticketId
+│  │
+│  └─ Hanya pesan dari customer saja (Agent)?
+│     └─ GET /api/agent/messages?ticketId=...
+│        → Hanya pesan customer dalam ticket
+│
+└─ Inbox Agent / Customer Messages
+   └─ Role: Agent Only
+      └─ GET /api/agent/messages
+         ├─ Tanpa parameter → Semua pesan customer
+         ├─ ?filter=unread → Hanya yang belum dibaca
+         ├─ ?filter=today → Pesan hari ini
+         ├─ ?ticketId=... → Dari ticket tertentu
+         ├─ ?customerId=... → Dari customer tertentu
+         └─ ?limit=N → Batasi jumlah messages
+```
+
+---
+
+### 📊 Use Case Examples
+
+#### Use Case 1: Customer Dashboard - Daftar Tickets Saya
+
+**Goal**: Tampilkan semua tickets yang pernah saya buat
+
+**API**: `GET /api/tickets`
+
+```javascript
+async function loadMyTickets() {
+  const response = await fetch('/api/tickets');
+  const data = await response.json();
+  
+  // Render tickets
+  data.data.tickets.forEach(ticket => {
+    console.log(`[${ticket.status}] ${ticket.subject} - ${ticket.messageCount} messages`);
+  });
+}
+```
+
+#### Use Case 2: Customer Chat View - Baca Pesan dalam Ticket
+
+**Goal**: Buka ticket dan lihat semua pesan conversation
+
+**API**: 
+1. `GET /api/tickets` → Dapatkan daftar tickets
+2. `GET /api/tickets/[ticketId]/messages` → Load messages
+
+```javascript
+async function openTicketChat(ticketId) {
+  const response = await fetch(`/api/tickets/${ticketId}/messages`);
+  const data = await response.json();
+  
+  console.log('Ticket:', data.data.ticketInfo.subject);
+  
+  // Render chat
+  data.data.messages.forEach(msg => {
+    const alignment = msg.senderRole === 'customer' ? 'left' : 'right';
+    console.log(`[${alignment}] ${msg.senderName}: ${msg.message}`);
+  });
+}
+```
+
+#### Use Case 3: Agent Dashboard - Semua Tickets Queue
+
+**Goal**: Lihat semua tickets yang masuk, prioritaskan yang unassigned
+
+**API**: `GET /api/tickets?filter=unassigned`
+
+```javascript
+async function loadTicketQueue() {
+  const response = await fetch('/api/tickets?filter=unassigned');
+  const data = await response.json();
+  
+  // Sort by priority
+  const sorted = data.data.tickets.sort((a, b) => {
+    const priority = { urgent: 4, high: 3, medium: 2, low: 1 };
+    return priority[b.priority] - priority[a.priority];
+  });
+  
+  console.log('Queue:', sorted);
+}
+```
+
+#### Use Case 4: Agent Inbox - Unread Customer Messages
+
+**Goal**: Notification badge dengan jumlah pesan belum dibaca
+
+**API**: `GET /api/agent/messages?filter=unread`
+
+```javascript
+async function getUnreadCount() {
+  const response = await fetch('/api/agent/messages?filter=unread');
+  const data = await response.json();
+  
+  const count = data.data.totalMessages;
+  
+  // Update badge
+  document.querySelector('.unread-badge').textContent = count;
+  
+  return count;
+}
+
+// Polling setiap 30 detik
+setInterval(getUnreadCount, 30000);
+```
+
+#### Use Case 5: Agent - Customer History
+
+**Goal**: Lihat semua komunikasi dengan customer tertentu
+
+**API**: `GET /api/agent/messages?customerId=...`
+
+```javascript
+async function viewCustomerHistory(customerId) {
+  const response = await fetch(`/api/agent/messages?customerId=${customerId}&limit=100`);
+  const data = await response.json();
+  
+  console.log(`Total messages from customer: ${data.data.totalMessages}`);
+  
+  // Group by ticket
+  const byTicket = data.data.messages.reduce((acc, msg) => {
+    if (!acc[msg.ticketId]) acc[msg.ticketId] = [];
+    acc[msg.ticketId].push(msg);
+    return acc;
+  }, {});
+  
+  console.log('Grouped by ticket:', byTicket);
+}
+```
+
+---
+
+### 🔄 Real-World Workflow Examples
+
+#### Workflow 1: Customer Creates Ticket and Checks Status
+
+```javascript
+// 1. Customer login (dapatkan token)
+// 2. Create ticket
+const createResponse = await fetch('/api/tickets/create', {
+  method: 'POST',
+  body: JSON.stringify({
+    subject: 'Masalah login',
+    message: 'Tidak bisa login ke aplikasi',
+    priority: 'high'
+  })
+});
+const { data: ticket } = await createResponse.json();
+console.log('Ticket created:', ticket.ticketId);
+
+// 3. Load my tickets (verify ticket muncul)
+const ticketsResponse = await fetch('/api/tickets');
+const { data: tickets } = await ticketsResponse.json();
+console.log('My tickets:', tickets.tickets);
+
+// 4. Load messages from ticket
+const messagesResponse = await fetch(`/api/tickets/${ticket.ticketId}/messages`);
+const { data: messages } = await messagesResponse.json();
+console.log('Messages:', messages.messages);
+```
+
+#### Workflow 2: Agent Responds to Customer
+
+```javascript
+// 1. Agent login
+// 2. Get unread messages
+const unreadResponse = await fetch('/api/agent/messages?filter=unread');
+const { data: unread } = await unreadResponse.json();
+console.log(`${unread.totalMessages} unread messages`);
+
+// 3. Pick first unread message
+const firstMessage = unread.messages[0];
+const ticketId = firstMessage.ticketId;
+
+// 4. Load full ticket conversation
+const chatResponse = await fetch(`/api/tickets/${ticketId}/messages`);
+const { data: chat } = await chatResponse.json();
+console.log('Full conversation:', chat.messages);
+
+// 5. Reply (POST)
+const replyResponse = await fetch(`/api/tickets/${ticketId}/messages`, {
+  method: 'POST',
+  body: JSON.stringify({
+    message: 'Terima kasih atas laporannya, kami akan cek'
+  })
+});
+
+// 6. Refresh messages
+const updatedChat = await fetch(`/api/tickets/${ticketId}/messages`);
+console.log('Updated:', await updatedChat.json());
+```
+
+#### Workflow 3: Agent Daily Monitoring
+
+```javascript
+// Morning routine: Check today's activity
+async function agentMorningRoutine() {
+  // 1. Get today's messages
+  const todayResponse = await fetch('/api/agent/messages?filter=today');
+  const { data: today } = await todayResponse.json();
+  console.log(`Today: ${today.totalMessages} new messages`);
+  
+  // 2. Get unread messages
+  const unreadResponse = await fetch('/api/agent/messages?filter=unread');
+  const { data: unread } = await unreadResponse.json();
+  console.log(`Unread: ${unread.totalMessages} messages`);
+  
+  // 3. Get unassigned tickets
+  const queueResponse = await fetch('/api/tickets?filter=unassigned');
+  const { data: queue } = await queueResponse.json();
+  console.log(`Queue: ${queue.totalTickets} tickets`);
+  
+  return {
+    todayMessages: today.totalMessages,
+    unreadMessages: unread.totalMessages,
+    queueTickets: queue.totalTickets
+  };
+}
+```
+
+---
+
+### ⚡ Performance Tips
+
+#### Tip 1: Gunakan Limit untuk Pagination
+
+```javascript
+// Jangan load semua messages sekaligus
+// BAD
+fetch('/api/agent/messages'); // Bisa ratusan messages
+
+// GOOD
+fetch('/api/agent/messages?limit=50'); // Load 50 terbaru dulu
+```
+
+#### Tip 2: Filter yang Spesifik
+
+```javascript
+// BAD: Load semua lalu filter di client
+const all = await fetch('/api/agent/messages');
+const unread = all.data.messages.filter(m => !m.isRead);
+
+// GOOD: Filter di server
+const unread = await fetch('/api/agent/messages?filter=unread');
+```
+
+#### Tip 3: Cache untuk Data yang Jarang Berubah
+
+```javascript
+// Cache tickets list (refresh every 5 minutes)
+let ticketsCache = null;
+let cacheTime = 0;
+
+async function getTickets(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && ticketsCache && (now - cacheTime < 300000)) {
+    return ticketsCache;
+  }
+  
+  const response = await fetch('/api/tickets');
+  ticketsCache = await response.json();
+  cacheTime = now;
+  
+  return ticketsCache;
+}
+```
+
+---
+
+### 📝 Summary - Cheat Sheet
+
+| Saya Ingin... | API yang Digunakan | Method | Role |
+|---------------|-------------------|--------|------|
+| Lihat tickets saya | `/api/tickets` | GET | Customer |
+| Lihat semua tickets | `/api/tickets?filter=all` | GET | Agent |
+| Lihat tickets unassigned | `/api/tickets?filter=unassigned` | GET | Agent |
+| Baca chat dalam ticket | `/api/tickets/[id]/messages` | GET | Customer/Agent |
+| Lihat inbox agent | `/api/agent/messages` | GET | Agent |
+| Lihat pesan belum dibaca | `/api/agent/messages?filter=unread` | GET | Agent |
+| Lihat pesan hari ini | `/api/agent/messages?filter=today` | GET | Agent |
+| Lihat pesan dari ticket X | `/api/agent/messages?ticketId=X` | GET | Agent |
+| Lihat pesan dari customer Y | `/api/agent/messages?customerId=Y` | GET | Agent |
+
+**Quick Reference**:
+```bash
+# Customer - My tickets
+GET /api/tickets
+
+# Customer - Chat in ticket
+GET /api/tickets/{ticketId}/messages
+
+# Agent - All tickets
+GET /api/tickets?filter=all
+
+# Agent - Inbox
+GET /api/agent/messages
+
+# Agent - Unread
+GET /api/agent/messages?filter=unread
+```
 
 ---
 

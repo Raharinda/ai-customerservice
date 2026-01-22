@@ -1,38 +1,21 @@
-import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
+import { adminDb } from '@/lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
 
+// POST - Create new ticket (PUBLIC - No Auth Required)
 export async function POST(request) {
   try {
-    // Ambil authorization header
-    const authHeader = request.headers.get('authorization');
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Token tidak ditemukan' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.split('Bearer ')[1];
-
-    // Verifikasi token
-    let decodedToken;
-    try {
-      decodedToken = await adminAuth.verifyIdToken(token);
-    } catch (error) {
-      console.error('❌ Token verification failed:', error);
-      return NextResponse.json(
-        { error: 'Unauthorized - Token tidak valid' },
-        { status: 401 }
-      );
-    }
-
-    const uid = decodedToken.uid;
-    console.log('✅ User authenticated:', uid);
+    console.log('📝 POST /api/tickets/create - Public access');
 
     // Ambil data dari request body
     const body = await request.json();
-    const { subject, message, priority = 'medium' } = body;
+    const { 
+      subject, 
+      message, 
+      category = 'general',
+      customerId = 'anonymous',
+      customerEmail = 'anonymous@example.com',
+      customerName = 'Anonymous User'
+    } = body;
 
     // Validasi input
     if (!subject || !message) {
@@ -56,64 +39,61 @@ export async function POST(request) {
       );
     }
 
-    // Ambil data user dari Firestore
-    const userDoc = await adminDb.collection('users').doc(uid).get();
-    
-    if (!userDoc.exists) {
+    // Validasi category
+    const validCategories = ['technical', 'billing', 'general', 'account', 'feature-request'];
+    if (!validCategories.includes(category)) {
       return NextResponse.json(
-        { error: 'User tidak ditemukan' },
-        { status: 404 }
+        { error: 'Category harus salah satu dari: technical, billing, general, account, feature-request' },
+        { status: 400 }
       );
     }
 
-    const userData = userDoc.data();
+    console.log('Creating ticket:', { subject, category, customerId });
 
     // Buat ticket baru
     const ticketData = {
-      customerId: uid,
-      customerName: userData.displayName || userData.email,
-      customerEmail: userData.email,
       subject: subject.trim(),
-      priority: priority,
-      status: 'open', // open, in-progress, resolved, closed
+      category,
+      status: 'open',
+      customerId,
+      customerEmail,
+      customerName,
+      assignedTo: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      assignedTo: null, // Will be assigned to agent later
-      messageCount: 1,
-      lastMessageAt: new Date().toISOString(),
     };
 
-    // Simpan ticket ke Firestore
     const ticketRef = await adminDb.collection('tickets').add(ticketData);
     const ticketId = ticketRef.id;
 
-    console.log('✅ Ticket created:', ticketId);
+    console.log(`✅ Ticket created with ID: ${ticketId}`);
 
-    // Buat pesan pertama di subcollection messages
-    const firstMessage = {
-      ticketId: ticketId,
-      senderId: uid,
-      senderName: userData.displayName || userData.email,
+    // Buat message pertama
+    const messageData = {
+      ticketId,
+      senderId: customerId,
+      senderName: customerName,
+      senderEmail: customerEmail,
       senderRole: 'customer',
       message: message.trim(),
       createdAt: new Date().toISOString(),
-      isRead: false,
+      read: false,
     };
 
     await adminDb
       .collection('tickets')
       .doc(ticketId)
       .collection('messages')
-      .add(firstMessage);
+      .add(messageData);
 
-    console.log('✅ First message added to ticket');
+    console.log('✅ Initial message added to ticket');
 
-    // Return response dengan data ticket
+    // Return success response
     return NextResponse.json({
       success: true,
       message: 'Ticket berhasil dibuat',
       data: {
-        ticketId: ticketId,
+        ticketId,
         ...ticketData,
       },
     }, { status: 201 });

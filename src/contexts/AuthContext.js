@@ -16,12 +16,16 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [firebaseUser, setFirebaseUser] = useState(null); // Store original Firebase user
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        // Store original Firebase user object
+        setFirebaseUser(fbUser);
+        
         // Get ID token untuk verifikasi di backend
-        const idToken = await firebaseUser.getIdToken();
+        const idToken = await fbUser.getIdToken();
         
         // Ambil data user dari Firestore untuk mendapatkan role
         try {
@@ -36,35 +40,43 @@ export const AuthProvider = ({ children }) => {
           if (response.ok) {
             const data = await response.json();
             setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
+              uid: fbUser.uid,
+              email: fbUser.email,
+              displayName: fbUser.displayName,
+              photoURL: fbUser.photoURL,
               idToken,
               role: data.user?.role || 'customer', // Default to customer if no role
+              // ADD: getIdToken method dari Firebase user
+              getIdToken: (forceRefresh) => fbUser.getIdToken(forceRefresh),
             });
           } else {
             // Fallback jika verifikasi gagal
             setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
+              uid: fbUser.uid,
+              email: fbUser.email,
+              displayName: fbUser.displayName,
+              photoURL: fbUser.photoURL,
               idToken,
               role: 'customer',
+              getIdToken: (forceRefresh) => fbUser.getIdToken(forceRefresh),
             });
           }
         } catch (error) {
           console.error('Error fetching user role:', error);
           // Fallback
           setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
+            uid: fbUser.uid,
+            email: fbUser.email,
+            displayName: fbUser.displayName,
+            photoURL: fbUser.photoURL,
             idToken,
             role: 'customer',
+            getIdToken: (forceRefresh) => fbUser.getIdToken(forceRefresh),
           });
         }
       } else {
         setUser(null);
+        setFirebaseUser(null);
       }
       setLoading(false);
     });

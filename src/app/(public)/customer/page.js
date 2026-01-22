@@ -17,7 +17,7 @@ export default function CustomerPage() {
     const [formData, setFormData] = useState({
         subject: '',
         message: '',
-        priority: 'medium',
+        category: 'general',
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -84,7 +84,7 @@ export default function CustomerPage() {
 
             if (response.ok) {
                 setSuccess('Ticket berhasil dibuat!');
-                setFormData({ subject: '', message: '', priority: 'medium' });
+                setFormData({ subject: '', message: '', category: 'general' });
                 // Reload tickets
                 loadTickets();
             } else {
@@ -121,15 +121,16 @@ export default function CustomerPage() {
         return badges[status] || badges.open;
     };
 
-    // Fungsi untuk mendapatkan warna badge priority
-    const getPriorityBadge = (priority) => {
+    // Fungsi untuk mendapatkan warna badge category
+    const getCategoryBadge = (category) => {
         const badges = {
-            low: 'bg-gray-100 text-gray-800',
-            medium: 'bg-blue-100 text-blue-800',
-            high: 'bg-orange-100 text-orange-800',
-            urgent: 'bg-red-100 text-red-800',
+            technical: 'bg-purple-100 text-purple-800',
+            billing: 'bg-green-100 text-green-800',
+            general: 'bg-blue-100 text-blue-800',
+            account: 'bg-yellow-100 text-yellow-800',
+            'feature-request': 'bg-pink-100 text-pink-800',
         };
-        return badges[priority] || badges.medium;
+        return badges[category] || badges.general;
     };
 
     return (
@@ -196,17 +197,18 @@ export default function CustomerPage() {
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Priority
+                                        Category
                                     </label>
                                     <select
-                                        value={formData.priority}
-                                        onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="low">Low - Pertanyaan umum</option>
-                                        <option value="medium">Medium - Masalah biasa</option>
-                                        <option value="high">High - Masalah penting</option>
-                                        <option value="urgent">Urgent - Sangat mendesak</option>
+                                        <option value="general">General - Pertanyaan umum</option>
+                                        <option value="technical">Technical - Masalah teknis/bug</option>
+                                        <option value="billing">Billing - Pertanyaan pembayaran</option>
+                                        <option value="account">Account - Masalah akun/profil</option>
+                                        <option value="feature-request">Feature Request - Permintaan fitur baru</option>
                                     </select>
                                 </div>
                                 
@@ -256,8 +258,8 @@ export default function CustomerPage() {
                                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(ticket.status)}`}>
                                                         {ticket.status}
                                                     </span>
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityBadge(ticket.priority)}`}>
-                                                        {ticket.priority}
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryBadge(ticket.category)}`}>
+                                                        {ticket.category}
                                                     </span>
                                                 </div>
                                             </div>
