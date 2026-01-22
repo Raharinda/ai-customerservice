@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
         // Get request ID from params
         const { id: requestId } = await params
 
-        // Verify user owns this request
+        // Verify user owns this request OR user is an agent
         const requestDoc = await adminDb
             .collection('requests')
             .doc(requestId)
@@ -31,15 +31,19 @@ export async function GET(request, { params }) {
             )
         }
 
-        if (requestDoc.data().userId !== userId) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        // Check if user is owner OR agent
+        const userDoc = await adminDb.collection('users').doc(userId).get()
+        const userRole = userDoc.exists ? userDoc.data().role : null
+        
+        if (requestDoc.data().userId !== userId && userRole !== 'agent') {
+            return NextResponse.json({ error: 'Forbidden - Only owner or agent can access' }, { status: 403 })
         }
 
         // ✅ Fetch messages from root collection with requestId filter
+        // NOTE: Untuk menghindari error index, kita fetch lalu sort di aplikasi
         const messagesSnapshot = await adminDb
             .collection('messages')
             .where('requestId', '==', requestId)
-            .orderBy('createdAt', 'asc')
             .get()
 
         const messages = []
@@ -52,9 +56,16 @@ export async function GET(request, { params }) {
                 createdAt: data.createdAt?.toDate?.()
                     ? data.createdAt.toDate().toISOString()
                     : data.createdAt,
-                // Determine sender based on userId
-                sender: data.userId === userId ? 'user' : 'agent',
+                // Determine sender based on senderRole or userId
+                sender: data.senderRole === 'agent' ? 'agent' : (data.userId === userId ? 'user' : 'agent'),
             })
+        })
+
+        // Sort by createdAt ascending di aplikasi
+        messages.sort((a, b) => {
+            const dateA = new Date(a.createdAt)
+            const dateB = new Date(b.createdAt)
+            return dateA - dateB // ascending order (oldest first)
         })
 
         console.log(

@@ -29,7 +29,7 @@ export default function CustomerMessagesInbox() {
   // - Error handling
   const { messages, loading, error, refresh } = useAgentMessages(filter, {
     autoRefresh: true,
-    refreshInterval: 30000, // 30 seconds
+    refreshInterval: 5000, // 5 seconds for real-time updates
   });
 
   // Get unread count (automatically updates every minute)
@@ -39,8 +39,13 @@ export default function CustomerMessagesInbox() {
     setFilter(newFilter);
   };
 
-  const handleViewTicket = (ticketId) => {
-    router.push(`/agent/tickets/${ticketId}`);
+  const handleViewTicket = (ticketId, source) => {
+    // Route based on source - ticket or request
+    if (source === 'request') {
+      router.push(`/agent/requests/${ticketId}`);
+    } else {
+      router.push(`/agent/tickets/${ticketId}`);
+    }
   };
 
   const getCategoryColor = (category) => {
@@ -95,7 +100,7 @@ export default function CustomerMessagesInbox() {
             Customer Messages
           </h1>
           <p className="text-gray-600 mt-1">
-            Pesan-pesan dari customer yang perlu ditangani
+            Auto-refresh setiap 5 detik • Real-time updates
           </p>
         </div>
         
@@ -169,25 +174,30 @@ export default function CustomerMessagesInbox() {
                 <div
                   key={msg.messageId}
                   className={`bg-white border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${
-                    !msg.isRead ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                    !msg.read ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
                   }`}
-                  onClick={() => handleViewTicket(msg.ticketId)}
+                  onClick={() => handleViewTicket(msg.ticketId, msg.source)}
                 >
                   {/* Message Header */}
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-gray-900">
-                          {msg.senderName}
+                          {msg.customerName || msg.senderName}
                         </h3>
-                        {!msg.isRead && (
+                        {!msg.read && (
                           <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
                             New
                           </span>
                         )}
+                        {msg.source === 'request' && (
+                          <span className="bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                            Request
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-600">
-                        {msg.senderEmail || 'No email'}
+                        {msg.customerEmail || msg.senderEmail || 'No email'}
                       </p>
                     </div>
                     
@@ -210,7 +220,7 @@ export default function CustomerMessagesInbox() {
 
                   {/* Message Content */}
                   <p className="text-gray-800 mb-3 line-clamp-2">
-                    {msg.message}
+                    {msg.message || msg.content}
                   </p>
 
                   {/* Message Footer */}

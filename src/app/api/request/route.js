@@ -16,10 +16,10 @@ export async function GET(request) {
         const userId = decodedToken.uid
 
         // Fetch user's requests
+        // NOTE: Untuk menghindari error index, kita fetch lalu sort di aplikasi
         const requestsSnapshot = await adminDb
             .collection('requests')
             .where('userId', '==', userId)
-            .orderBy('createdAt', 'desc')
             .get()
 
         const requests = []
@@ -28,6 +28,13 @@ export async function GET(request) {
                 id: doc.id,
                 ...doc.data(),
             })
+        })
+
+        // Sort by createdAt descending di aplikasi
+        requests.sort((a, b) => {
+            const dateA = new Date(a.createdAt)
+            const dateB = new Date(b.createdAt)
+            return dateB - dateA // descending order
         })
 
         console.log(`✅ Fetched ${requests.length} requests for user ${userId}`)

@@ -21,7 +21,7 @@ export function useAgentMessages(filter = 'all', options = {}) {
     customerId = null,
     limit = 50,
     autoRefresh = true,
-    refreshInterval = 30000, // 30 seconds
+    refreshInterval = 5000, // 5 seconds for real-time updates
   } = options;
 
   // Fetch messages function
@@ -136,8 +136,8 @@ export function useUnreadMessagesCount() {
 
     fetchUnreadCount();
 
-    // Refresh count every minute
-    const interval = setInterval(fetchUnreadCount, 60000);
+    // Refresh count every 10 seconds for real-time updates
+    const interval = setInterval(fetchUnreadCount, 10000);
 
     return () => clearInterval(interval);
   }, [user, getIdToken]); // Add getIdToken to dependencies

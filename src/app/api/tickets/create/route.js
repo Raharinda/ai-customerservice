@@ -1,66 +1,135 @@
 import { adminDb } from '@/lib/firebaseAdmin';
+import { adminAuth } from '@/lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
 
-// POST - Create new ticket (PUBLIC - No Auth Required)
+/**
+ * POST /api/tickets/create
+ * Create new ticket - UNIFIED SYSTEM (replaces old request system)
+ * 
+ * Optimizations:
+ * - Denormalized customer data for fast reads
+ * - Counter fields (messageCount) to avoid subcollection counting
+ * - lastMessageAt for efficient sorting
+ * - Supports both authenticated and anonymous users
+ */
 export async function POST(request) {
   try {
-    console.log('📝 POST /api/tickets/create - Public access');
+    console.log('📝 POST /api/tickets/create - Unified ticket system');
 
-    // Ambil data dari request body
+    // Parse request body
     const body = await request.json();
     const { 
       subject, 
-      message, 
+      message,
+      description, // Alias for message (backward compatibility)
       category,
-      customerId = 'anonymous',
-      customerEmail = 'anonymous@example.com',
-      customerName = 'Anonymous User'
+      priority = 'medium',
+      customerId,
+      customerEmail,
+      customerName,
+      idToken // Optional - for authenticated users
     } = body;
 
-    // Validasi input
-    if (!subject || !message || !category) {
+    const messageContent = message || description;
+
+    // === VALIDATION ===
+    if (!subject || !messageContent || !category) {
       return NextResponse.json(
-        { error: 'Subject, message, dan category wajib diisi' },
+        { error: 'Subject, message, and category are required' },
         { status: 400 }
       );
     }
 
     if (subject.trim().length < 5) {
       return NextResponse.json(
-        { error: 'Subject minimal 5 karakter' },
+        { error: 'Subject must be at least 5 characters' },
         { status: 400 }
       );
     }
 
-    if (message.trim().length < 10) {
+    if (messageContent.trim().length < 10) {
       return NextResponse.json(
-        { error: 'Message minimal 10 karakter' },
+        { error: 'Message must be at least 10 characters' },
         { status: 400 }
       );
     }
 
-    // Validasi category
-    const validCategories = ['Technical Issue', 'Billing & Payment', 'Feature Request', 'Account Access', 'Other'];
+    // Validate category
+    const validCategories = [
+      'Technical Issue', 
+      'Billing & Payment', 
+      'Feature Request', 
+      'Account Access', 
+      'Other'
+    ];
     if (!validCategories.includes(category)) {
       return NextResponse.json(
-        { error: 'Category harus salah satu dari: Technical Issue, Billing & Payment, Feature Request, Account Access, Other' },
+        { error: `Category must be one of: ${validCategories.join(', ')}` },
         { status: 400 }
       );
     }
 
-    console.log('Creating ticket:', { subject, category, customerId });
+    // Validate priority
+    const validPriorities = ['low', 'medium', 'high', 'urgent'];
+    if (!validPriorities.includes(priority)) {
+      return NextResponse.json(
+        { error: `Priority must be one of: ${validPriorities.join(', ')}` },
+        { status: 400 }
+      );
+    }
 
-    // Buat ticket baru
+    // === AUTHENTICATION (Optional) ===
+    let userId = customerId || 'anonymous';
+    let userEmail = customerEmail || 'anonymous@example.com';
+    let userName = customerName || 'Anonymous User';
+
+    if (idToken) {
+      try {
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        userId = decodedToken.uid;
+        userEmail = decodedToken.email || userEmail;
+        userName = decodedToken.name || decodedToken.email || userName;
+      } catch (authError) {
+        console.warn('⚠️ Token verification failed, using anonymous:', authError.message);
+      }
+    }
+
+    console.log('Creating ticket:', { subject, category, priority, userId });
+
+    // === CREATE TICKET (Optimized Structure) ===
+    const now = new Date().toISOString();
+    
     const ticketData = {
+      // Core fields
       subject: subject.trim(),
+      description: messageContent.trim(),
       category,
+      priority,
       status: 'open',
-      customerId,
-      customerEmail,
-      customerName,
+      
+      // Customer info (denormalized for fast reads)
+      customerId: userId,
+      customerEmail: userEmail,
+      customerName: userName,
+      
+      // Assignment
       assignedTo: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      
+      // Timestamps (for sorting and tracking)
+      createdAt: now,
+      updatedAt: now,
+      lastMessageAt: now, // Will be updated when new messages arrive
+      
+      // Counters (to avoid counting subcollection)
+      messageCount: 1, // Initial message counts as 1
+      unreadCount: 1, // For agent - new ticket is unread
+      
+      // Optional fields
+      tags: [], // For future categorization
+      metadata: {
+        source: idToken ? 'authenticated' : 'anonymous',
+        userAgent: request.headers.get('user-agent') || 'unknown'
+      }
     };
 
     const ticketRef = await adminDb.collection('tickets').add(ticketData);
@@ -68,33 +137,45 @@ export async function POST(request) {
 
     console.log(`✅ Ticket created with ID: ${ticketId}`);
 
-    // Buat message pertama
-    const messageData = {
-      ticketId,
-      senderId: customerId,
-      senderName: customerName,
-      senderEmail: customerEmail,
+    // === CREATE INITIAL MESSAGE (Optimized) ===
+    const initialMessageData = {
+      // Sender info (denormalized)
+      senderId: userId,
+      senderName: userName,
+      senderEmail: userEmail,
       senderRole: 'customer',
-      message: message.trim(),
-      createdAt: new Date().toISOString(),
+      
+      // Message content
+      message: messageContent.trim(),
+      
+      // Metadata
+      createdAt: now,
       read: false,
+      
+      // Optional
+      attachments: [], // For future file uploads
+      edited: false,
+      editedAt: null
     };
 
     await adminDb
       .collection('tickets')
       .doc(ticketId)
       .collection('messages')
-      .add(messageData);
+      .add(initialMessageData);
 
     console.log('✅ Initial message added to ticket');
 
-    // Return success response
+    // === RESPONSE ===
     return NextResponse.json({
       success: true,
-      message: 'Ticket berhasil dibuat',
+      message: 'Ticket created successfully',
       data: {
         ticketId,
-        ...ticketData,
+        ticket: {
+          id: ticketId,
+          ...ticketData,
+        },
       },
     }, { status: 201 });
 

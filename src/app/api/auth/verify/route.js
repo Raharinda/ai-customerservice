@@ -1,4 +1,4 @@
-import { adminAuth } from '@/lib/firebaseAdmin';
+import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
@@ -15,6 +15,19 @@ export async function POST(request) {
     // Verifikasi token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
 
+    // Ambil role dari Firestore
+    let role = 'customer'; // default role
+    try {
+      const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        role = userData.role || 'customer';
+      }
+    } catch (firestoreError) {
+      console.error('Error fetching user role from Firestore:', firestoreError);
+      // Tetap lanjut dengan role default
+    }
+
     return NextResponse.json(
       {
         valid: true,
@@ -22,6 +35,7 @@ export async function POST(request) {
           uid: decodedToken.uid,
           email: decodedToken.email,
           name: decodedToken.name,
+          role: role,
         },
       },
       { status: 200 }

@@ -1,15 +1,11 @@
 'use client'
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-<<<<<<< HEAD
 import CustomerMessagesInbox from '@/components/agent/CustomerMessagesInbox'
-=======
->>>>>>> feat/frontend-ui
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-<<<<<<< HEAD
 /**
  * Agent Dashboard - SEAMLESS Experience
  * 
@@ -24,8 +20,6 @@ import { useEffect } from 'react'
  * 3. Components automatically fetch data using hooks
  * 4. No manual token input needed - completely seamless!
  */
-=======
->>>>>>> feat/frontend-ui
 export default function AgentDashboard() {
     const { user, logout } = useAuth()
     const router = useRouter()
@@ -52,8 +46,7 @@ export default function AgentDashboard() {
     }
 
     return (
-        <ProtectedRoute>
-<<<<<<< HEAD
+        <ProtectedRoute requiredRole="agent">
             <div className="min-h-screen bg-gray-50">
                 {/* Header */}
                 <header className="bg-white border-b border-gray-200">
@@ -65,18 +58,6 @@ export default function AgentDashboard() {
                                 </h1>
                                 <p className="mt-1 text-sm text-gray-500">
                                     Welcome, {user?.displayName || user?.email} | Role: Support Agent
-=======
-            <div className="min-h-screen bg-gray-100 p-8">
-                <div className="max-w-6xl mx-auto">
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <div>
-                                <h1 className="text-2xl font-bold">
-                                    Support Agent Dashboard
-                                </h1>
-                                <p className="text-sm text-gray-600 mt-1">
-                                    Welcome, {user?.displayName || user?.email}
->>>>>>> feat/frontend-ui
                                 </p>
                             </div>
                             <button
@@ -86,7 +67,6 @@ export default function AgentDashboard() {
                                 Logout
                             </button>
                         </div>
-<<<<<<< HEAD
                     </div>
                 </header>
 
@@ -106,50 +86,6 @@ export default function AgentDashboard() {
                     {/* Customer Messages Component - Automatically fetches with token */}
                     <CustomerMessagesInbox />
                 </main>
-=======
-
-                        <div className="border-t pt-6">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <h2 className="text-lg font-semibold text-blue-900 mb-2">
-                                    🎯 Agent Tools
-                                </h2>
-                                <p className="text-blue-700">
-                                    Access AI-powered tools to analyze
-                                    conversations, classify issues, understand
-                                    customer sentiment, and get intelligent
-                                    response suggestions.
-                                </p>
-                            </div>
-
-                            <h2 className="text-xl font-semibold mb-4">
-                                Account Information
-                            </h2>
-                            <div className="space-y-2">
-                                <p>
-                                    <span className="font-medium">Name:</span>{' '}
-                                    {user?.displayName || user?.email}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Email:</span>{' '}
-                                    {user?.email}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Role:</span>{' '}
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Support Agent
-                                    </span>
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        User ID:
-                                    </span>{' '}
-                                    {user?.uid}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
->>>>>>> feat/frontend-ui
             </div>
         </ProtectedRoute>
     )

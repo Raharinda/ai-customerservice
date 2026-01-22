@@ -4,8 +4,15 @@ import { NextResponse } from 'next/server';
 // GET - Get all messages from a ticket (PUBLIC - No Auth Required)
 export async function GET(request, { params }) {
   try {
-    const { ticketId } = params;
-    console.log(`📬 GET /api/tickets/\${ticketId}/messages - Public access`);
+    const { ticketId } = await params;
+    console.log(`📬 GET /api/tickets/${ticketId}/messages - Public access`);
+
+    if (!ticketId) {
+      return NextResponse.json(
+        { error: 'Ticket ID diperlukan' },
+        { status: 400 }
+      );
+    }
 
     // Cek apakah ticket exists
     const ticketDoc = await adminDb.collection('tickets').doc(ticketId).get();
@@ -53,50 +60,96 @@ export async function GET(request, { params }) {
   }
 }
 
-// POST - Send message to a ticket (PUBLIC - No Auth Required)
+/**
+ * POST /api/tickets/[ticketId]/messages
+ * Send a new message to a ticket - OPTIMIZED
+ * 
+ * Features:
+ * - Auto-update counters (messageCount, lastMessageAt)
+ * - Auto-update ticket status based on sender role
+ * - Support authentication via idToken
+ * - Denormalized sender data for fast reads
+ */
 export async function POST(request, { params }) {
   try {
-    const { ticketId } = params;
-    console.log(`📨 POST /api/tickets/\${ticketId}/messages - Public access`);
+    const { ticketId } = await params;
+    console.log(`📨 POST /api/tickets/${ticketId}/messages - Optimized`);
 
-    // Ambil data dari request body
+    if (!ticketId) {
+      return NextResponse.json(
+        { error: 'Ticket ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Parse request body
     const body = await request.json();
     const { 
       message,
+      idToken, // Optional - for authenticated users
       senderId = 'anonymous',
       senderName = 'Anonymous',
       senderEmail = 'anonymous@example.com',
       senderRole = 'customer'
     } = body;
 
-    // Validasi input
+    // Validate message
     if (!message || message.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Message tidak boleh kosong' },
+        { error: 'Message cannot be empty' },
         { status: 400 }
       );
     }
 
-    // Cek apakah ticket exists
-    const ticketDoc = await adminDb.collection('tickets').doc(ticketId).get();
+    // === AUTHENTICATION (Optional) ===
+    let userId = senderId;
+    let userName = senderName;
+    let userEmail = senderEmail;
+    let userRole = senderRole;
+
+    if (idToken) {
+      try {
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        userId = decodedToken.uid;
+        userEmail = decodedToken.email || userEmail;
+        userName = decodedToken.name || decodedToken.email || userName;
+        
+        // Check if user is agent
+        const userDoc = await adminDb.collection('users').doc(userId).get();
+        if (userDoc.exists && userDoc.data().role === 'agent') {
+          userRole = 'agent';
+        }
+      } catch (authError) {
+        console.warn('⚠️ Token verification failed:', authError.message);
+      }
+    }
+
+    // Check if ticket exists
+    const ticketRef = adminDb.collection('tickets').doc(ticketId);
+    const ticketDoc = await ticketRef.get();
     
     if (!ticketDoc.exists) {
       return NextResponse.json(
-        { error: 'Ticket tidak ditemukan' },
+        { error: 'Ticket not found' },
         { status: 404 }
       );
     }
 
-    // Buat pesan baru
+    const ticketData = ticketDoc.data();
+    const now = new Date().toISOString();
+
+    // === CREATE MESSAGE (Optimized structure) ===
     const messageData = {
-      ticketId,
-      senderId,
-      senderName,
-      senderEmail,
-      senderRole,
+      senderId: userId,
+      senderName: userName,
+      senderEmail: userEmail,
+      senderRole: userRole,
       message: message.trim(),
-      createdAt: new Date().toISOString(),
+      createdAt: now,
       read: false,
+      attachments: [],
+      edited: false,
+      editedAt: null
     };
 
     const messageRef = await adminDb
@@ -105,13 +158,38 @@ export async function POST(request, { params }) {
       .collection('messages')
       .add(messageData);
 
-    // Update ticket's updatedAt
-    await adminDb.collection('tickets').doc(ticketId).update({
-      updatedAt: new Date().toISOString(),
-      status: 'open', // Reopen ticket if it was closed
-    });
+    console.log(`✅ Message added with ID: ${messageRef.id}`);
 
-    console.log(`✅ Message added with ID: \${messageRef.id}`);
+    // === UPDATE TICKET (Optimized - batch update) ===
+    const updateData = {
+      updatedAt: now,
+      lastMessageAt: now,
+      messageCount: (ticketData.messageCount || 0) + 1,
+    };
+
+    // Auto-update status based on sender role
+    if (userRole === 'agent') {
+      if (ticketData.status === 'open') {
+        updateData.status = 'in-progress';
+      }
+      // Auto-assign to responding agent if not assigned
+      if (!ticketData.assignedTo) {
+        updateData.assignedTo = userId;
+      }
+      // Reset unread count for agent responses
+      updateData.unreadCount = 0;
+    } else if (userRole === 'customer') {
+      // Increment unread count for customer messages
+      updateData.unreadCount = (ticketData.unreadCount || 0) + 1;
+      // Reopen ticket if it was closed
+      if (ticketData.status === 'closed' || ticketData.status === 'resolved') {
+        updateData.status = 'open';
+      }
+    }
+
+    await ticketRef.update(updateData);
+
+    console.log(`✅ Ticket ${ticketId} updated`);
 
     return NextResponse.json({
       success: true,
