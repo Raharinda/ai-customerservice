@@ -16,6 +16,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+<<<<<<< HEAD
   const [firebaseUser, setFirebaseUser] = useState(null); // Store original Firebase user
 
   useEffect(() => {
@@ -26,6 +27,14 @@ export const AuthProvider = ({ children }) => {
         
         // Get ID token untuk verifikasi di backend
         const idToken = await fbUser.getIdToken();
+=======
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Get ID token untuk verifikasi di backend
+        const idToken = await firebaseUser.getIdToken();
+>>>>>>> feat/frontend-ui
         
         // Ambil data user dari Firestore untuk mendapatkan role
         try {
@@ -40,6 +49,7 @@ export const AuthProvider = ({ children }) => {
           if (response.ok) {
             const data = await response.json();
             setUser({
+<<<<<<< HEAD
               uid: fbUser.uid,
               email: fbUser.email,
               displayName: fbUser.displayName,
@@ -48,10 +58,18 @@ export const AuthProvider = ({ children }) => {
               role: data.user?.role || 'customer', // Default to customer if no role
               // ADD: getIdToken method dari Firebase user
               getIdToken: (forceRefresh) => fbUser.getIdToken(forceRefresh),
+=======
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              idToken,
+              role: data.user?.role || 'customer', // Default to customer if no role
+>>>>>>> feat/frontend-ui
             });
           } else {
             // Fallback jika verifikasi gagal
             setUser({
+<<<<<<< HEAD
               uid: fbUser.uid,
               email: fbUser.email,
               displayName: fbUser.displayName,
@@ -59,12 +77,20 @@ export const AuthProvider = ({ children }) => {
               idToken,
               role: 'customer',
               getIdToken: (forceRefresh) => fbUser.getIdToken(forceRefresh),
+=======
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              idToken,
+              role: 'customer',
+>>>>>>> feat/frontend-ui
             });
           }
         } catch (error) {
           console.error('Error fetching user role:', error);
           // Fallback
           setUser({
+<<<<<<< HEAD
             uid: fbUser.uid,
             email: fbUser.email,
             displayName: fbUser.displayName,
@@ -72,11 +98,21 @@ export const AuthProvider = ({ children }) => {
             idToken,
             role: 'customer',
             getIdToken: (forceRefresh) => fbUser.getIdToken(forceRefresh),
+=======
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            idToken,
+            role: 'customer',
+>>>>>>> feat/frontend-ui
           });
         }
       } else {
         setUser(null);
+<<<<<<< HEAD
         setFirebaseUser(null);
+=======
+>>>>>>> feat/frontend-ui
       }
       setLoading(false);
     });
@@ -275,6 +311,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+<<<<<<< HEAD
   // Function untuk mendapatkan fresh ID token
   const getIdToken = async () => {
     try {
@@ -289,6 +326,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+=======
+>>>>>>> feat/frontend-ui
   const value = {
     user,
     loading,
@@ -297,7 +336,10 @@ export const AuthProvider = ({ children }) => {
     loginAsAgent,
     loginWithGoogle,
     logout,
+<<<<<<< HEAD
     getIdToken, // Tambahkan method untuk get fresh token
+=======
+>>>>>>> feat/frontend-ui
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
