@@ -11,16 +11,16 @@ export async function POST(request) {
     const { 
       subject, 
       message, 
-      category = 'general',
+      category,
       customerId = 'anonymous',
       customerEmail = 'anonymous@example.com',
       customerName = 'Anonymous User'
     } = body;
 
     // Validasi input
-    if (!subject || !message) {
+    if (!subject || !message || !category) {
       return NextResponse.json(
-        { error: 'Subject dan message wajib diisi' },
+        { error: 'Subject, message, dan category wajib diisi' },
         { status: 400 }
       );
     }
@@ -40,10 +40,10 @@ export async function POST(request) {
     }
 
     // Validasi category
-    const validCategories = ['technical', 'billing', 'general', 'account', 'feature-request'];
+    const validCategories = ['Technical Issue', 'Billing & Payment', 'Feature Request', 'Account Access', 'Other'];
     if (!validCategories.includes(category)) {
       return NextResponse.json(
-        { error: 'Category harus salah satu dari: technical, billing, general, account, feature-request' },
+        { error: 'Category harus salah satu dari: Technical Issue, Billing & Payment, Feature Request, Account Access, Other' },
         { status: 400 }
       );
     }

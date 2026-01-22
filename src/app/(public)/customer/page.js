@@ -17,7 +17,7 @@ export default function CustomerPage() {
     const [formData, setFormData] = useState({
         subject: '',
         message: '',
-        category: 'general',
+        category: '',
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -84,7 +84,7 @@ export default function CustomerPage() {
 
             if (response.ok) {
                 setSuccess('Ticket berhasil dibuat!');
-                setFormData({ subject: '', message: '', category: 'general' });
+                setFormData({ subject: '', message: '', category: '' });
                 // Reload tickets
                 loadTickets();
             } else {
@@ -124,13 +124,13 @@ export default function CustomerPage() {
     // Fungsi untuk mendapatkan warna badge category
     const getCategoryBadge = (category) => {
         const badges = {
-            technical: 'bg-purple-100 text-purple-800',
-            billing: 'bg-green-100 text-green-800',
-            general: 'bg-blue-100 text-blue-800',
-            account: 'bg-yellow-100 text-yellow-800',
-            'feature-request': 'bg-pink-100 text-pink-800',
+            'Technical Issue': 'bg-purple-100 text-purple-800',
+            'Billing & Payment': 'bg-green-100 text-green-800',
+            'Feature Request': 'bg-pink-100 text-pink-800',
+            'Account Access': 'bg-yellow-100 text-yellow-800',
+            'Other': 'bg-blue-100 text-blue-800',
         };
-        return badges[category] || badges.general;
+        return badges[category] || badges['Other'];
     };
 
     return (
@@ -203,12 +203,14 @@ export default function CustomerPage() {
                                         value={formData.category}
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        required
                                     >
-                                        <option value="general">General - Pertanyaan umum</option>
-                                        <option value="technical">Technical - Masalah teknis/bug</option>
-                                        <option value="billing">Billing - Pertanyaan pembayaran</option>
-                                        <option value="account">Account - Masalah akun/profil</option>
-                                        <option value="feature-request">Feature Request - Permintaan fitur baru</option>
+                                        <option value="">Select category</option>
+                                        <option value="Technical Issue">Technical Issue</option>
+                                        <option value="Billing & Payment">Billing & Payment</option>
+                                        <option value="Feature Request">Feature Request</option>
+                                        <option value="Account Access">Account Access</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 

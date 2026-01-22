@@ -45,13 +45,13 @@ export default function CustomerMessagesInbox() {
 
   const getCategoryColor = (category) => {
     const colors = {
-      technical: 'bg-purple-100 text-purple-800',
-      billing: 'bg-green-100 text-green-800',
-      general: 'bg-blue-100 text-blue-800',
-      account: 'bg-yellow-100 text-yellow-800',
-      'feature-request': 'bg-pink-100 text-pink-800',
+      'Technical Issue': 'bg-purple-100 text-purple-800',
+      'Billing & Payment': 'bg-green-100 text-green-800',
+      'Feature Request': 'bg-pink-100 text-pink-800',
+      'Account Access': 'bg-yellow-100 text-yellow-800',
+      'Other': 'bg-blue-100 text-blue-800',
     };
-    return colors[category] || colors.general;
+    return colors[category] || colors['Other'];
   };
 
   const getStatusColor = (status) => {
