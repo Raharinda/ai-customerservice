@@ -229,7 +229,7 @@ export default function AgentRequestDetail() {
                                                     <div className="text-xs opacity-75 mb-1">
                                                         {msg.senderName || (msg.sender === 'agent' ? 'Agent' : 'Customer')}
                                                     </div>
-                                                    <p className="break-words">{msg.content}</p>
+                                                    <p className="wrap-break-word">{msg.content}</p>
                                                     <div className="text-xs opacity-75 mt-1">
                                                         {new Date(msg.createdAt).toLocaleTimeString('id-ID', {
                                                             hour: '2-digit',
