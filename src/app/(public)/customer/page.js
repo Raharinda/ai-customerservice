@@ -13,6 +13,7 @@ import {
     FormRequest,
     AuthButton,
 } from './_components'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 export default function RequestPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)
@@ -59,18 +60,6 @@ export default function RequestPage() {
     }
 
     return (
-<<<<<<< Updated upstream
-        <div>
-            {/* Navbar */}
-            <div className='flex flex-col gap-4 p-5 shadow-sm justify-between'>
-                <div className='flex items-center justify-between'>
-                    {/* Left Side */}
-                    <div>
-                        <h1 className='text-xl font-bold'>
-                            <Link href='/'>Support AI</Link>
-                        </h1>
-                    </div>
-=======
         <ProtectedRoute requiredRole='customer'>
             <div>
                 {/* Navbar */}
@@ -82,38 +71,38 @@ export default function RequestPage() {
                                 <Link href='/'>Support AI</Link>
                             </h1>
                         </div>
->>>>>>> Stashed changes
 
-                    {/* Right Side */}
-                    <div className='flex gap-2'>
-                        <FormRequest />
-                        <AuthButton />
+                        {/* Right Side */}
+                        <div className='flex gap-2'>
+                            <FormRequest />
+                            <AuthButton />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <SearchBar />
+                <SearchBar />
 
-            <div className=' mx-auto p-4 h-screen flex flex-col'>
-                {!selectedRequest ? (
-                    <RequestList
-                        requests={requests}
-                        loading={loading}
-                        error={error}
-                        onRefresh={refreshRequests}
-                        onSelectRequest={handleSelectRequest}
-                    />
-                ) : (
-                    <MessageDetail
-                        request={selectedRequest}
-                        messages={messages}
-                        loading={messagesLoading}
-                        sending={sending}
-                        onSendMessage={sendMessage}
-                        onBack={handleBack}
-                    />
-                )}
+                <div className=' mx-auto p-4 h-screen flex flex-col'>
+                    {!selectedRequest ? (
+                        <RequestList
+                            requests={requests}
+                            loading={loading}
+                            error={error}
+                            onRefresh={refreshRequests}
+                            onSelectRequest={handleSelectRequest}
+                        />
+                    ) : (
+                        <MessageDetail
+                            request={selectedRequest}
+                            messages={messages}
+                            loading={messagesLoading}
+                            sending={sending}
+                            onSendMessage={sendMessage}
+                            onBack={handleBack}
+                        />
+                    )}
+                </div>
             </div>
-        </div>
+        </ProtectedRoute>
     )
 }

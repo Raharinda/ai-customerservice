@@ -34,7 +34,6 @@ export default function CustomerMessagesInbox() {
     })
 
     const { count: unreadCount } = useUnreadMessagesCount()
-    console.log('Messages from API:', messages)
 
     const handleFilterChange = (newFilter) => {
         setFilter(newFilter)
