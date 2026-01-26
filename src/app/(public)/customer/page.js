@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRequests } from '@/hooks/useRequests'
 import { useMessages } from '@/hooks/useMessages'
 import { useAuth } from '@/contexts/AuthContext'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 import {
     RequestList,
@@ -13,7 +14,6 @@ import {
     FormRequest,
     AuthButton,
 } from './_components'
-import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 export default function RequestPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)

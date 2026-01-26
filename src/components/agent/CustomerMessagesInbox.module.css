@@ -1,0 +1,53 @@
+/* Customer Messages Inbox Styles */
+.customer-messages-inbox {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Loading Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Line Clamp for Message Preview */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .customer-messages-inbox {
+    padding: 1rem;
+  }
+
+  .flex.gap-2.mb-6 {
+    flex-wrap: wrap;
+  }
+
+  .flex.justify-between.items-start {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .flex.gap-2.mb-6 {
+    display: none;
+  }
+
+  .bg-white.border.rounded-lg {
+    page-break-inside: avoid;
+  }
+}
