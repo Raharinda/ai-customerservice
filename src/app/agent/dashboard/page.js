@@ -2,9 +2,13 @@
 
 import FormRequest from '@/app/(public)/customer/_components/FormRequest'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+<<<<<<< Updated upstream
 import AuthButton from '@/components/AuthButton'
 import MessageDetail from '@/components/MessageDetail'
 import RequestList from '@/components/RequestList'
+=======
+import CustomerMessagesInbox from '@/app/agent/_components/CustomerMessageInbox'
+>>>>>>> Stashed changes
 import { useAuth } from '@/contexts/AuthContext'
 import { useMessages } from '@/hooks/useMessages'
 import { useRequests } from '@/hooks/useRequests'
@@ -12,11 +16,24 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+<<<<<<< Updated upstream
+=======
+/**
+ * Agent Dashboard - SEAMLESS Experience with MODULAR Components
+ *
+ * ✅ Automatic authentication
+ * ✅ No manual token handling needed
+ * ✅ Auto-refresh messages
+ * ✅ Protected route (only agents can access)
+ * ✅ MODULAR architecture - easy to maintain
+ */
+>>>>>>> Stashed changes
 export default function AgentDashboard() {
     const { user, logout } = useAuth()
     const router = useRouter()
 
     useEffect(() => {
+<<<<<<< Updated upstream
         // Redirect jika bukan agent
         // if (user && user.role !== 'agent') {
         //     router.push('/customer')
@@ -25,6 +42,14 @@ export default function AgentDashboard() {
         // if (!user) {
         //     router.push('/agent')
         // }
+=======
+        if (user && user.role !== 'agent') {
+            router.push('/customer')
+        }
+        if (!user) {
+            router.push('/agent')
+        }
+>>>>>>> Stashed changes
     }, [user, router])
 
     // if (!user || user.role !== 'agent') {
@@ -67,6 +92,7 @@ export default function AgentDashboard() {
 
     if (selectedRequest) {
         return (
+<<<<<<< Updated upstream
             <MessageDetail
                 request={selectedRequest}
                 messages={messages}
@@ -76,10 +102,18 @@ export default function AgentDashboard() {
                 onBack={handleBack}
                 currentUserId={user?.uid}
             />
+=======
+            <div className='min-h-screen flex items-center justify-center'>
+                <div className='text-center'>
+                    <p className='text-gray-600'>Memverifikasi akses...</p>
+                </div>
+            </div>
+>>>>>>> Stashed changes
         )
     }
 
     return (
+<<<<<<< Updated upstream
         <div className=''>
             {/* Navbar */}
             <div className='flex flex-col gap-4 p-5 shadow-sm justify-between'>
@@ -159,6 +193,38 @@ export default function AgentDashboard() {
                         )}
                     </div>
                 </div>
+=======
+        <ProtectedRoute requiredRole='agent'>
+            <div className='min-h-screen bg-gray-50'>
+                {/* Header */}
+                <header className='bg-white border-b border-gray-200'>
+                    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+                        <div className='flex justify-between items-center py-6'>
+                            <div>
+                                <h1 className='text-3xl font-bold text-gray-900'>
+                                    Agent Dashboard
+                                </h1>
+                                <p className='mt-1 text-sm text-gray-500'>
+                                    Welcome, {user?.displayName || user?.email}{' '}
+                                    | Role: Support Agent
+                                </p>
+                            </div>
+                            <button
+                                onClick={logout}
+                                className='bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors'
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Main Content */}
+                <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                    {/* Customer Messages - Now using modular components */}
+                    <CustomerMessagesInbox />
+                </main>
+>>>>>>> Stashed changes
             </div>
         </div>
     )

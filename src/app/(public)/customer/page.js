@@ -1,16 +1,18 @@
 'use client'
 
-// pages/RequestPage.jsx (Main Container)
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { useRequests } from '@/hooks/useRequests'
 import { useMessages } from '@/hooks/useMessages'
-import RequestList from '@/components/RequestList'
-import MessageDetail from '@/components/MessageDetail'
-import SearchBar from './_components/SearchBar'
-import AuthButton from '@/components/AuthButton'
-import FormRequest from './_components/FormRequest'
-import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+
+import {
+    RequestList,
+    MessageDetail,
+    SearchBar,
+    FormRequest,
+    AuthButton,
+} from './_components'
 
 export default function RequestPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)
@@ -57,6 +59,7 @@ export default function RequestPage() {
     }
 
     return (
+<<<<<<< Updated upstream
         <div>
             {/* Navbar */}
             <div className='flex flex-col gap-4 p-5 shadow-sm justify-between'>
@@ -67,6 +70,19 @@ export default function RequestPage() {
                             <Link href='/'>Support AI</Link>
                         </h1>
                     </div>
+=======
+        <ProtectedRoute requiredRole='customer'>
+            <div>
+                {/* Navbar */}
+                <div className='flex flex-col gap-4 p-5 shadow-sm justify-between'>
+                    <div className='flex items-center justify-between'>
+                        {/* Left Side */}
+                        <div>
+                            <h1 className='text-xl font-bold'>
+                                <Link href='/'>Support AI</Link>
+                            </h1>
+                        </div>
+>>>>>>> Stashed changes
 
                     {/* Right Side */}
                     <div className='flex gap-2'>
