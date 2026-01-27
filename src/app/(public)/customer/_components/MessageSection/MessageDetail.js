@@ -60,18 +60,17 @@ export default function MessageDetail({
 
     const generateTicketNumber = (category, createdAt) => {
         const categoryPrefix = {
-            Technical: 'T',
-            Billing: 'B',
-            General: 'G',
-            Support: 'S',
-            Bug: 'BG',
-            Feature: 'F',
+            'Technical Issue': 'T',
+            'Billing & Payment': 'B',
+            'Other': 'G',
+            'Account Access': 'S',
+            'Feature Request': 'F',
         }
 
         const date = new Date(createdAt)
         const year = date.getFullYear().toString().slice(-2)
         const month = (date.getMonth() + 1).toString().padStart(2, '0')
-        const random = request.id.slice(0, 2).toUpperCase()
+        const random = (request.ticketId || request.id).slice(0, 2).toUpperCase()
 
         const prefix = categoryPrefix[category] || 'R'
         return `${prefix}-${year}${month}${random}`
@@ -116,14 +115,17 @@ export default function MessageDetail({
                 ) : (
                     <div className='space-y-4'>
                         {messages.map((message) => {
-                            const isUser = message.sender === 'user'
+                            // ✅ MIGRASI: Support both old (sender) and new (senderRole) format
+                            const isUser = message.sender === 'user' || 
+                                          message.senderRole === 'customer' ||
+                                          message.senderId === currentUserId
                             const senderName = isUser
                                 ? 'You'
                                 : message.senderName || 'Agent'
 
                             return (
                                 <div
-                                    key={message.id}
+                                    key={message.messageId || message.id}
                                     className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                                 >
                                     {/* Sender Name */}
@@ -140,7 +142,7 @@ export default function MessageDetail({
                                         }`}
                                     >
                                         <p className='whitespace-pre-wrap'>
-                                            {message.content}
+                                            {message.message || message.content}
                                         </p>
                                         <p
                                             className={`text-xs mt-1 ${

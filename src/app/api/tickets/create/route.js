@@ -3,6 +3,35 @@ import { adminAuth } from '@/lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
 
 /**
+ * Trigger AI analysis asynchronously (fire and forget)
+ */
+async function triggerAIAnalysis(ticketId) {
+  try {
+    console.log(`🚀 Triggering AI analysis for ticket: ${ticketId}`);
+    
+    // Call AI worker endpoint
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/ai/analyze-ticket`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ticketId }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'AI analysis failed');
+    }
+
+    console.log(`✅ AI analysis triggered for ticket: ${ticketId}`);
+  } catch (error) {
+    console.error(`❌ Error triggering AI analysis:`, error);
+    throw error;
+  }
+}
+
+/**
  * POST /api/tickets/create
  * Create new ticket - UNIFIED SYSTEM (replaces old request system)
  * 
@@ -11,6 +40,7 @@ import { NextResponse } from 'next/server';
  * - Counter fields (messageCount) to avoid subcollection counting
  * - lastMessageAt for efficient sorting
  * - Supports both authenticated and anonymous users
+ * - AI analysis triggered automatically for new tickets
  */
 export async function POST(request) {
   try {
@@ -124,6 +154,15 @@ export async function POST(request) {
       messageCount: 1, // Initial message counts as 1
       unreadCount: 1, // For agent - new ticket is unread
       
+      // ✅ AI Analysis Status - DEFAULT: pending untuk ticket baru
+      aiAnalysis: {
+        status: 'pending', // pending | processing | done | error
+        processedAt: null,
+        error: null,
+        // Hasil AI akan diisi oleh worker nanti:
+        // sentiment, category, urgency, suggestedResponse
+      },
+      
       // Optional fields
       tags: [], // For future categorization
       metadata: {
@@ -135,7 +174,7 @@ export async function POST(request) {
     const ticketRef = await adminDb.collection('tickets').add(ticketData);
     const ticketId = ticketRef.id;
 
-    console.log(`✅ Ticket created with ID: ${ticketId}`);
+    console.log(`✅ Ticket created with ID: ${ticketId}, AI status: pending`);
 
     // === CREATE INITIAL MESSAGE (Optimized) ===
     const initialMessageData = {
@@ -165,6 +204,13 @@ export async function POST(request) {
       .add(initialMessageData);
 
     console.log('✅ Initial message added to ticket');
+
+    // === TRIGGER AI WORKER (Async - Fire and Forget) ===
+    // Jalankan AI analysis di background tanpa tunggu response
+    triggerAIAnalysis(ticketId).catch(err => {
+      console.error('❌ Failed to trigger AI analysis:', err);
+      // Error di-catch tapi tidak block response ke client
+    });
 
     // === RESPONSE ===
     return NextResponse.json({

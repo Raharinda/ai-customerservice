@@ -1,6 +1,7 @@
 // Firebase Client SDK Configuration (Client-side)
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,6 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase only if it hasn't been initialized
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
+const db = getFirestore(app); // ✅ Initialize Firestore
 
 // Initialize Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
@@ -21,4 +23,4 @@ googleProvider.setCustomParameters({
   prompt: 'select_account' // Selalu tampilkan account picker
 });
 
-export { app, auth, googleProvider };
+export { app, auth, db, googleProvider };

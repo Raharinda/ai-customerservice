@@ -22,7 +22,10 @@ export default function LoginForm() {
 
         try {
             const result = await login(email, password)
-            console.log('Login result:', result)
+            console.log('✅ Login result:', result)
+
+            // ✅ FIX: Tunggu sebentar agar auth state selesai update
+            await new Promise((resolve) => setTimeout(resolve, 500))
 
             // Redirect ke customer dashboard
             router.push('/customer')
@@ -42,7 +45,11 @@ export default function LoginForm() {
 
         try {
             const result = await loginWithGoogle()
-            console.log('Google login result:', result)
+            console.log('✅ Google login result:', result)
+
+            // ✅ FIX: Tunggu sebentar agar auth state selesai update
+            await new Promise((resolve) => setTimeout(resolve, 500))
+
             router.push('/customer') // Redirect setelah login
         } catch (err) {
             console.error('Google login error:', err)

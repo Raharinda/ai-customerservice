@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useTicketMessages } from '@/hooks/useTicketMessages'
+import { useTicketMessages } from '@/hooks/shared/useTicketMessages'
 import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
@@ -16,7 +16,7 @@ export default function TicketDetailPage() {
 
     const { messages, ticket, loading, error, sending, sendMessage, refresh } =
         useTicketMessages(ticketId, {
-            autoRefresh: true,
+            autoRefresh: false,
             refreshInterval: 10000, // 10 seconds
         })
 

@@ -1,4 +1,4 @@
-import { adminDb } from '@/lib/firebaseAdmin';
+import { adminDb, adminAuth } from '@/lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
 
 // GET - Get all messages from a ticket (PUBLIC - No Auth Required)

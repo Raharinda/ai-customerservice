@@ -11,6 +11,7 @@ import { RequestList, FormRequest } from './_components/RequestSection'
 import { MessageDetail } from './_components/MessageSection'
 import AuthButton from './auth/_components/AuthButton'
 import SearchBar from './_components/SearchBar'
+import { useTicketMessages } from '@/hooks/shared/useTicketMessages'
 
 export default function RequestPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)
@@ -21,7 +22,7 @@ export default function RequestPage() {
         loading: messagesLoading,
         sending,
         sendMessage,
-    } = useMessages(selectedRequest?.id)
+    } = useTicketMessages(selectedRequest?.ticketId || selectedRequest?.id)
 
     const handleRequestCreated = (newRequestId) => {
         refreshRequests()

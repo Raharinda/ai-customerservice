@@ -52,7 +52,7 @@ export default function RequestList({
                 </div>
                 {requests.map((request) => (
                     <RequestItem
-                        key={request.id}
+                        key={request.ticketId || request.id}
                         request={request}
                         onClick={onSelectRequest}
                     />
