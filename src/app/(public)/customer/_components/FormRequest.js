@@ -17,15 +17,15 @@ export default function FormRequest() {
     const onSubmit = async (data) => {
         try {
             const idToken = await auth.currentUser.getIdToken(true)
-            const res = await fetch('/api/request', {
+            // ✅ MIGRASI: Ganti ke /api/tickets/create
+            const res = await fetch('/api/tickets/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     subject: data.subject,
                     category: data.category,
-                    description: data.description,
+                    message: data.description, // tickets API pakai 'message' bukan 'description'
                     idToken,
-                    createInitialMessage: true, // Flag untuk create message otomatis
                 }),
             })
 
@@ -47,7 +47,9 @@ export default function FormRequest() {
 
             setOpen(false)
             reset() // Reset form setelah sukses
-            alert('Request berhasil dikirim')
+            alert('Ticket berhasil dibuat!')
+            // Refresh halaman untuk load ticket baru
+            window.location.reload()
         } catch (err) {
             console.error(err)
             alert(err.message || 'Terjadi kesalahan')
@@ -122,19 +124,19 @@ export default function FormRequest() {
                                     <option value='' disabled>
                                         Select category
                                     </option>
-                                    <option value='Technical'>
+                                    <option value='Technical Issue'>
                                         Technical Issue
                                     </option>
-                                    <option value='Billing'>
+                                    <option value='Billing & Payment'>
                                         Billing & Payment
                                     </option>
-                                    <option value='Feature'>
+                                    <option value='Feature Request'>
                                         Feature Request
                                     </option>
-                                    <option value='Support'>
+                                    <option value='Account Access'>
                                         Account Access
                                     </option>
-                                    <option value='General'>Other</option>
+                                    <option value='Other'>Other</option>
                                 </select>
                             </div>
 

@@ -71,9 +71,9 @@ export function useTicketMessages(ticketId, options = {}) {
         body: JSON.stringify({
           message: messageText.trim(),
           senderId: user?.uid || 'anonymous',
-          senderName: user?.displayName || user?.email || 'Support Agent',
-          senderEmail: user?.email || 'agent@example.com',
-          senderRole: user?.role || 'agent',
+          senderName: user?.displayName || user?.email || 'Customer',
+          senderEmail: user?.email || 'customer@example.com',
+          senderRole: user?.role || 'customer', // ✅ Default customer role
         }),
       });
 

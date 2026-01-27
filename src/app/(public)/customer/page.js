@@ -3,7 +3,7 @@
 // pages/RequestPage.jsx (Main Container)
 import React, { useState } from 'react'
 import { useRequests } from '@/hooks/useRequests'
-import { useMessages } from '@/hooks/useMessages'
+import { useTicketMessages } from '@/hooks/useTicketMessages'
 import RequestList from '@/components/RequestList'
 import MessageDetail from '@/components/MessageDetail'
 import SearchBar from './_components/SearchBar'
@@ -22,7 +22,7 @@ export default function RequestPage() {
         loading: messagesLoading,
         sending,
         sendMessage,
-    } = useMessages(selectedRequest?.id)
+    } = useTicketMessages(selectedRequest?.ticketId || selectedRequest?.id)
 
     const handleRequestCreated = (newRequestId) => {
         refreshRequests()

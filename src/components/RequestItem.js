@@ -57,18 +57,17 @@ export default function RequestItem({ request, onClick }) {
 
     const generateTicketNumber = (category, createdAt) => {
         const categoryPrefix = {
-            Technical: 'T',
-            Billing: 'B',
-            General: 'G',
-            Support: 'S',
-            Bug: 'BG',
-            Feature: 'F',
+            'Technical Issue': 'T',
+            'Billing & Payment': 'B',
+            'Other': 'G',
+            'Account Access': 'S',
+            'Feature Request': 'F',
         }
 
         const date = new Date(createdAt)
         const year = date.getFullYear().toString().slice(-2)
         const month = (date.getMonth() + 1).toString().padStart(2, '0')
-        const random = request.id.slice(0, 2).toUpperCase()
+        const random = (request.ticketId || request.id).slice(0, 2).toUpperCase()
 
         const prefix = categoryPrefix[category] || 'R'
         return `${prefix}-${year}${month}${random}`

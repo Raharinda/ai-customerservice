@@ -34,7 +34,8 @@ export function useRequests() {
 
             const idToken = await currentUser.getIdToken()
 
-            const response = await fetch('/api/request', {
+            // ✅ MIGRASI: Ganti dari /api/request ke /api/tickets
+            const response = await fetch(`/api/tickets?customerId=${currentUser.uid}`, {
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${idToken}`,
@@ -61,8 +62,9 @@ export function useRequests() {
 
             const data = await response.json()
 
-            console.log('✅ Requests loaded:', data.requests?.length || 0)
-            setRequests(data.requests || [])
+            console.log('✅ Tickets loaded:', data.data?.tickets?.length || 0)
+            // ✅ MIGRASI: Sesuaikan response structure dari tickets API
+            setRequests(data.data?.tickets || [])
         } catch (err) {
             console.error('❌ Fetch error:', err)
             setError(err.message)

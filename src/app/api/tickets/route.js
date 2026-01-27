@@ -12,7 +12,8 @@ export async function GET(request) {
     const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit')) || 100;
 
-    let ticketsQuery = adminDb.collection('tickets').orderBy('createdAt', 'desc');
+    // ✅ FIX: Mulai tanpa orderBy untuk menghindari composite index requirement
+    let ticketsQuery = adminDb.collection('tickets');
 
     // Optional filters
     if (customerId) {
@@ -35,7 +36,14 @@ export async function GET(request) {
       ...doc.data(),
     }));
 
-    console.log(`✅ Retrieved \${tickets.length} tickets`);
+    // ✅ FIX: Sort di aplikasi, bukan di database
+    tickets.sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return dateB - dateA; // descending (newest first)
+    });
+
+    console.log(`✅ Retrieved ${tickets.length} tickets`);
 
     // Return response
     return NextResponse.json({

@@ -25,6 +25,9 @@ export default function AgentLoginPage() {
       const result = await loginAsAgent(email, password, agentKey);
       console.log('✅ Agent login result:', result);
       
+      // ✅ FIX: Tunggu auth state update selesai
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Force refresh user data untuk memastikan role ter-update
       console.log('🔄 Refreshing user data to get updated role...');
       await refreshUser();
