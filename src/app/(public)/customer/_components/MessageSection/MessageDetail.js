@@ -136,7 +136,7 @@ export default function MessageDetail({
                                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                                             isUser
                                                 ? 'bg-blue-600 text-white'
-                                                : 'bg-white text-gray-800 border'
+                                                : 'bg-white text-gray-800 border border-gray-300'
                                         }`}
                                     >
                                         <p className='whitespace-pre-wrap'>

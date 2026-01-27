@@ -53,7 +53,7 @@ export function MessageCard({ message: msg, onViewTicket }) {
             {/* Ticket Subject */}
             <div className='bg-gray-100 px-3 py-2 rounded mb-3'>
                 <p className='text-sm font-medium text-gray-700'>
-                    📋 {msg.ticketSubject}
+                    {msg.ticketSubject}
                 </p>
                 {msg.ticketId && msg.ticketCategory && msg.createdAt && (
                     <p className='text-xs text-gray-500 mt-1'>
@@ -66,11 +66,6 @@ export function MessageCard({ message: msg, onViewTicket }) {
                     </p>
                 )}
             </div>
-
-            {/* Message Content */}
-            <p className='text-gray-800 mb-3 line-clamp-2'>
-                {msg.message || msg.content}
-            </p>
 
             {/* Message Footer */}
             <div className='flex justify-between items-center text-sm'>

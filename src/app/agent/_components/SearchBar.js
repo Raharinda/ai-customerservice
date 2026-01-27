@@ -3,7 +3,7 @@ import { CiSearch } from 'react-icons/ci'
 
 export default function SearchBar() {
     return (
-        <div className='relative max-w-7xl mx-auto my-5'>
+        <div className='relative max-w-7xl mx-auto'>
             <CiSearch
                 size={20}
                 className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
