@@ -1,24 +1,26 @@
 'use client'
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-import CustomerMessagesInbox from '@/components/agent/CustomerMessagesInbox'
+import AgentTicketsDashboard from '@/components/agent/AgentTicketsDashboard'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 /**
- * Agent Dashboard - SEAMLESS Experience
+ * Agent Dashboard - AI-Powered Ticket Management
  * 
- * ✅ Automatic authentication
- * ✅ No manual token handling needed
- * ✅ Auto-refresh messages
+ * ✅ Real-time ticket updates
+ * ✅ AI Analysis results for each ticket
+ * ✅ Filter by urgency (critical/high/medium/low)
+ * ✅ Filter by status (pending/in-progress/resolved)
  * ✅ Protected route (only agents can access)
  * 
  * HOW IT WORKS:
- * 1. User login sebagai agent
- * 2. Token automatically managed by Firebase SDK & AuthContext
- * 3. Components automatically fetch data using hooks
- * 4. No manual token input needed - completely seamless!
+ * 1. Agent login
+ * 2. Dashboard shows all tickets with AI analysis
+ * 3. Real-time updates via Firestore listener
+ * 4. AI analysis status: pending → processing → done
+ * 5. Urgency-based prioritization for agents
  */
 export default function AgentDashboard() {
     const { user, logout } = useAuth()
@@ -49,15 +51,15 @@ export default function AgentDashboard() {
         <ProtectedRoute requiredRole="agent">
             <div className="min-h-screen bg-gray-50">
                 {/* Header */}
-                <header className="bg-white border-b border-gray-200">
+                <header className="bg-white border-b border-gray-200 shadow-sm">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center py-6">
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900">
-                                    Agent Dashboard
+                                    🤖 AI-Powered Agent Dashboard
                                 </h1>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Welcome, {user?.displayName || user?.email} | Role: Support Agent
+                                    Welcome, {user?.displayName || user?.email} | Support Agent
                                 </p>
                             </div>
                             <button
@@ -70,21 +72,24 @@ export default function AgentDashboard() {
                     </div>
                 </header>
 
-                {/* Main Content - SEAMLESS Customer Messages */}
+                {/* Main Content */}
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* Info Banner */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                        <h2 className="text-lg font-semibold text-blue-900 mb-2">
-                            🎯 Seamless Message Management
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                        <h2 className="text-lg font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                            <span className="text-2xl">🎯</span>
+                            AI-Assisted Ticket Management
                         </h2>
-                        <p className="text-blue-700">
-                            Messages are automatically loaded and refreshed. No manual token handling needed!
-                            Just login and everything works automatically. ✨
+                        <p className="text-purple-700 text-sm">
+                            Every ticket is automatically analyzed by AI to provide:
+                            <span className="font-semibold"> Urgency Score, Customer Mood, Sentiment Analysis, Summary</span>, and 
+                            <span className="font-semibold"> Suggested Reply</span>. 
+                            Real-time updates keep you informed as tickets come in!
                         </p>
                     </div>
 
-                    {/* Customer Messages Component - Automatically fetches with token */}
-                    <CustomerMessagesInbox />
+                    {/* Tickets Dashboard with AI Analysis */}
+                    <AgentTicketsDashboard />
                 </main>
             </div>
         </ProtectedRoute>
