@@ -20,7 +20,7 @@ export function useAgentMessages(filter = 'all', options = {}) {
         ticketId = null,
         customerId = null,
         limit = 50,
-        autoRefresh = true,
+        autoRefresh = false,
         refreshInterval = 5000, // 5 seconds for real-time updates
     } = options
 
@@ -37,7 +37,7 @@ export function useAgentMessages(filter = 'all', options = {}) {
             setError(null)
 
             try {
-                // 🔑 AUTOMATIC TOKEN HANDLING - Use getIdToken from AuthContext
+                // AUTOMATIC TOKEN HANDLING - Use getIdToken from AuthContext
                 const token = await getIdToken()
 
                 // Build query params

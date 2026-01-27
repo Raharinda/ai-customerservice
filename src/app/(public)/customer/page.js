@@ -2,18 +2,15 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRequests } from '@/hooks/useRequests'
-import { useMessages } from '@/hooks/useMessages'
+import { useRequests } from '@/hooks/shared/useRequests'
+import { useMessages } from '@/hooks/customer/useMessages'
 import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
-import {
-    RequestList,
-    MessageDetail,
-    SearchBar,
-    FormRequest,
-    AuthButton,
-} from './_components'
+import { RequestList, FormRequest } from './_components/RequestSection'
+import { MessageDetail } from './_components/MessageSection'
+import AuthButton from './auth/_components/AuthButton'
+import SearchBar from './_components/SearchBar'
 
 export default function RequestPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)
@@ -60,7 +57,10 @@ export default function RequestPage() {
     }
 
     return (
-        <ProtectedRoute requiredRole='customer'>
+        <ProtectedRoute
+            requiredRole='customer'
+            unauthRedirect='/customer/auth/login'
+        >
             <div>
                 {/* Navbar */}
                 <div className='flex flex-col gap-4 p-5 shadow-sm justify-between'>

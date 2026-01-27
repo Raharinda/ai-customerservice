@@ -56,7 +56,7 @@ export default function FormRequest() {
 
     const handleOpen = () => {
         if (!user) {
-            router.push('/login')
+            router.push('customer/auth/login')
             return
         }
         setOpen(true)

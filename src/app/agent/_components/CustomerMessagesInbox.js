@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
     useAgentMessages,
     useUnreadMessagesCount,
-} from '@/hooks/useAgentMessages'
+} from '@/hooks/agent/useAgentMessages'
 import {
     InboxHeader,
     MessageList,

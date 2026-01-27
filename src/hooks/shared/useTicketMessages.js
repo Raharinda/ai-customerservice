@@ -16,7 +16,7 @@ export function useTicketMessages(ticketId, options = {}) {
     const { user, getIdToken } = useAuth()
 
     const {
-        autoRefresh = true,
+        autoRefresh = false,
         refreshInterval = 10000, // 10 seconds
     } = options
 
@@ -28,7 +28,7 @@ export function useTicketMessages(ticketId, options = {}) {
         }
 
         try {
-            console.log(`📬 Fetching messages for ticket: ${ticketId}`)
+            console.log(`Fetching messages for ticket: ${ticketId}`)
 
             const response = await fetch(`/api/tickets/${ticketId}/messages`)
 
@@ -44,7 +44,7 @@ export function useTicketMessages(ticketId, options = {}) {
                 setTicket(data.data.ticket || null)
                 setError(null)
                 console.log(
-                    `✅ Loaded ${data.data.messages?.length || 0} messages`,
+                    `Loaded ${data.data.messages?.length || 0} messages`,
                 )
             }
         } catch (err) {
@@ -64,7 +64,7 @@ export function useTicketMessages(ticketId, options = {}) {
 
             setSending(true)
             try {
-                console.log(`📨 Sending message to ticket: ${ticketId}`)
+                console.log(`Sending message to ticket: ${ticketId}`)
 
                 const response = await fetch(
                     `/api/tickets/${ticketId}/messages`,
@@ -92,14 +92,14 @@ export function useTicketMessages(ticketId, options = {}) {
                     throw new Error(data.error || 'Failed to send message')
                 }
 
-                console.log('✅ Message sent successfully')
+                console.log('Message sent successfully')
 
                 // Refresh messages setelah kirim
                 await fetchMessages()
 
                 return data.data
             } catch (err) {
-                console.error('❌ Error sending message:', err)
+                console.error('Error sending message:', err)
                 throw err
             } finally {
                 setSending(false)
@@ -118,7 +118,7 @@ export function useTicketMessages(ticketId, options = {}) {
         if (!autoRefresh || !ticketId) return
 
         const intervalId = setInterval(() => {
-            console.log('🔄 Auto-refreshing ticket messages...')
+            console.log('Auto-refreshing ticket messages...')
             fetchMessages()
         }, refreshInterval)
 

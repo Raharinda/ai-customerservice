@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import ProfileOverlay from './ProfileOverlay'
+import ProfileOverlay from '@/app/(public)/customer/_components/ProfileSection/ProfileOverlay'
 
 export default function AuthButton() {
     const { user, loading } = useAuth()
@@ -13,7 +13,7 @@ export default function AuthButton() {
     if (!user) {
         return (
             <button
-                onClick={() => (window.location.href = '/login')}
+                onClick={() => (window.location.href = 'customer/auth/login')}
                 className='px-4 py-2 bg-zinc-100 border-2 border-transparent text-black rounded-lg text-sm hover:border-2 hover:border-gray-300'
             >
                 Login

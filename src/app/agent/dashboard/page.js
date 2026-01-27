@@ -31,7 +31,7 @@ export default function AgentDashboard() {
     }
 
     return (
-        <ProtectedRoute requiredRole='agent'>
+        <ProtectedRoute requiredRole='agent' unauthRedirect='/agent'>
             <div className='min-h-screen bg-gray-50'>
                 {/* Header */}
                 <header className='bg-white border-b border-gray-200'>
