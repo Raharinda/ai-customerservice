@@ -5,7 +5,7 @@
  */
 
 /**
- * Generate analysis prompt for Gemini AI
+ * Generate analysis prompt for Gemini AI (initial message only)
  * @param {Object} ticketData - Ticket data containing customer message
  * @returns {string} - Formatted prompt for Gemini
  */
@@ -36,6 +36,44 @@ ${customerMessage}
 
 Expected output (complete valid JSON):
 {"mood": "frustrated", "urgency_score": 82, "summary": "Customer cannot access account", "suggested_reply": "Hello! I'll help you resolve the login issue. Please try resetting your password."}`;
+
+  return prompt;
+}
+
+/**
+ * Generate analysis prompt with FULL CONVERSATION CONTEXT (for re-analysis)
+ * @param {string} subject - Ticket subject
+ * @param {string} conversationContext - Formatted conversation history
+ * @returns {string} - Formatted prompt for Gemini
+ */
+export function generateAnalysisPromptWithConversation(subject, conversationContext) {
+  const prompt = `You are an AI assistant for customer support agents.
+
+Analyze this ENTIRE customer support conversation and return ONLY valid JSON with these fields:
+
+1. mood: the customer's current emotional state after the conversation (1–2 words, e.g., "frustrated", "angry", "calm", "satisfied", "escalated", "resolved")
+2. urgency_score: number from 1 to 100 indicating how urgent this issue is NOW (consider the full context)
+3. summary: one short sentence summarizing the current state and main issue (max 150 characters)
+4. suggested_reply: one professional and helpful next step the support agent can take (max 200 characters)
+
+CRITICAL RULES:
+- Return ONLY valid JSON, no markdown, no code blocks, no explanation
+- MUST close all JSON strings and objects properly
+- Keep suggested_reply SHORT (under 200 characters)
+- Support both Indonesian and English messages
+- Consider the FULL conversation to assess urgency and mood
+- Do NOT wrap response in markdown code blocks
+- Output must be parseable by JSON.parse()
+
+Ticket subject: ${subject}
+
+Full conversation:
+"""
+${conversationContext}
+"""
+
+Expected output (complete valid JSON):
+{"mood": "frustrated", "urgency_score": 82, "summary": "Customer still waiting for account access", "suggested_reply": "I'll escalate this to our technical team immediately for priority resolution."}`;
 
   return prompt;
 }

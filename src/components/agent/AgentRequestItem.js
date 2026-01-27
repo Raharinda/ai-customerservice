@@ -224,9 +224,55 @@ export default function AgentRequestItem({ request, onClick }) {
                 {/* ✅ AI Analysis Results (ONLY SHOW IF DONE) */}
                 {request.aiAnalysis?.status === 'done' && (
                     <div className='bg-linear-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-3 space-y-2'>
-                        <div className='flex items-center gap-2'>
-                            <FaRobot className="text-purple-600 text-lg" />
-                            <span className='text-sm font-semibold text-purple-900'>AI Analysis Results</span>
+                        <div className='flex items-center justify-between'>
+                            <div className='flex items-center gap-2'>
+                                <FaRobot className="text-purple-600 text-lg" />
+                                <span className='text-sm font-semibold text-purple-900'>AI Analysis Results</span>
+                                {request.aiAnalysis.reprocessCount > 0 && (
+                                    <span className='text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full'>
+                                        Re-analyzed {request.aiAnalysis.reprocessCount}x
+                                    </span>
+                                )}
+                            </div>
+                            {/* ✅ Re-analyze button (Tugas 2) */}
+                            <button
+                                onClick={async (e) => {
+                                    e.stopPropagation(); // Prevent ticket card click
+                                    
+                                    if (!confirm('Re-analyze this ticket with AI? This will update the analysis based on the full conversation.')) {
+                                        return;
+                                    }
+                                    
+                                    try {
+                                        console.log('🔄 Re-analyzing ticket:', request.ticketId);
+                                        
+                                        const response = await fetch(`/api/agent/tickets/${request.ticketId}/reanalyze`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                            },
+                                        });
+                                        
+                                        const data = await response.json();
+                                        
+                                        if (response.ok) {
+                                            console.log('✅ Re-analysis triggered successfully');
+                                            alert('Re-analysis started! The ticket will be updated shortly.');
+                                        } else {
+                                            console.error('❌ Re-analysis failed:', data.error);
+                                            alert(`Failed to start re-analysis: ${data.error}`);
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ Error triggering re-analysis:', error);
+                                        alert('Error triggering re-analysis. Please try again.');
+                                    }
+                                }}
+                                className='text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-lg transition-colors flex items-center gap-1'
+                                title='Re-analyze with full conversation context'
+                            >
+                                <FaRobot className="text-sm" />
+                                Re-analyze
+                            </button>
                         </div>
                         
                         {/* Mood & Sentiment Row */}

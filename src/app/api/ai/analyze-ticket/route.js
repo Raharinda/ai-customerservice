@@ -1,7 +1,8 @@
 import { adminDb } from '@/lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
 import { 
-  generateAnalysisPrompt, 
+  generateAnalysisPrompt,
+  generateAnalysisPromptWithConversation, 
   parseGeminiResponse, 
   mapUrgencyLevel, 
   mapMoodToSentiment 
@@ -22,7 +23,7 @@ import { analyzeTicketWithGemini } from '@/lib/geminiAPI';
  */
 export async function POST(request) {
   try {
-    const { ticketId } = await request.json();
+    const { ticketId, conversationContext, isReanalysis } = await request.json();
 
     if (!ticketId) {
       return NextResponse.json(
@@ -32,6 +33,9 @@ export async function POST(request) {
     }
 
     console.log(`🤖 AI Worker: Starting analysis for ticket ${ticketId}`);
+    if (isReanalysis && conversationContext) {
+      console.log(`🔄 RE-ANALYSIS mode with FULL CONVERSATION`);
+    }
 
     // === STEP 1: Worker ambil data ticket dari Firestore ===
     const ticketRef = adminDb.collection('tickets').doc(ticketId);
@@ -51,11 +55,12 @@ export async function POST(request) {
       subject: ticketData.subject,
       category: ticketData.category,
       description: ticketData.description?.substring(0, 50) + '...',
+      aiAnalysisStatus: ticketData.aiAnalysis?.status,
     });
 
-    // Cek apakah sudah diproses atau sedang diproses
-    if (ticketData.aiAnalysis?.status === 'done') {
-      console.log(`⚠️ Ticket ${ticketId} already analyzed, skipping`);
+    // ✅ UPDATED: Cek apakah sudah diproses (kecuali jika reprocess diminta)
+    if (ticketData.aiAnalysis?.status === 'done' && ticketData.aiAnalysis?.reprocessRequested !== true) {
+      console.log(`⚠️ Ticket ${ticketId} already analyzed and no reprocess requested, skipping`);
       return NextResponse.json({
         success: true,
         message: 'Ticket already analyzed',
@@ -70,6 +75,16 @@ export async function POST(request) {
         message: 'Ticket already being processed',
         data: { ticketId, status: 'processing' }
       });
+    }
+
+    // ✅ CHECK: Apakah ini re-analyze request?
+    const isReprocess = ticketData.aiAnalysis?.reprocessRequested === true;
+    
+    if (isReprocess) {
+      console.log(`🔄 RE-ANALYZE requested for ticket ${ticketId}`);
+      console.log(`   Previous analysis: mood=${ticketData.aiAnalysis.mood}, urgency=${ticketData.aiAnalysis.urgency}`);
+    } else {
+      console.log(`🆕 First-time analysis for ticket ${ticketId}`);
     }
 
     const now = new Date().toISOString();
@@ -87,35 +102,64 @@ export async function POST(request) {
       // === STEP 3: Worker kirim data ke Gemini API ===
       console.log(`📤 Worker preparing to send data to Gemini...`);
       
-      // Ambil message pertama (initial message) dari subcollection
-      const messagesSnapshot = await adminDb
-        .collection('tickets')
-        .doc(ticketId)
-        .collection('messages')
-        .orderBy('createdAt', 'asc')
-        .limit(1)
-        .get();
+      let prompt;
+      let dataForGemini;
 
-      let initialMessage = ticketData.description;
-      if (!messagesSnapshot.empty) {
-        initialMessage = messagesSnapshot.docs[0].data().message;
+      // ✅ NEW: Check if we have conversation context (re-analysis)
+      if (conversationContext && isReanalysis) {
+        console.log(`💬 Using FULL CONVERSATION context for re-analysis`);
+        prompt = generateAnalysisPromptWithConversation(
+          ticketData.subject,
+          conversationContext
+        );
+        dataForGemini = {
+          ticketId,
+          subject: ticketData.subject,
+          conversationContext: conversationContext,
+          category: ticketData.category,
+          isReanalysis: true,
+        };
+      } else {
+        // First-time analysis: use initial message only
+        console.log(`📝 Using initial message for first-time analysis`);
+        
+        // Ambil message pertama (initial message) dari subcollection
+        const messagesSnapshot = await adminDb
+          .collection('tickets')
+          .doc(ticketId)
+          .collection('messages')
+          .orderBy('createdAt', 'asc')
+          .limit(1)
+          .get();
+
+        let initialMessage = ticketData.description;
+        if (!messagesSnapshot.empty) {
+          initialMessage = messagesSnapshot.docs[0].data().message;
+        }
+
+        // Siapkan data untuk dikirim ke Gemini
+        dataForGemini = {
+          ticketId,
+          subject: ticketData.subject,
+          description: initialMessage,
+          category: ticketData.category,
+          customerName: ticketData.customerName,
+          createdAt: ticketData.createdAt,
+        };
+
+        prompt = generateAnalysisPrompt(dataForGemini);
       }
 
-      // Siapkan data untuk dikirim ke Gemini
-      const dataForGemini = {
-        ticketId,
-        subject: ticketData.subject,
-        description: initialMessage,
-        category: ticketData.category,
-        customerName: ticketData.customerName,
-        createdAt: ticketData.createdAt,
-      };
-
-      console.log(`📦 Data prepared for Gemini:`, dataForGemini);
+      console.log(`📦 Data prepared for Gemini:`, {
+        ticketId: dataForGemini.ticketId,
+        subject: dataForGemini.subject,
+        isReanalysis: dataForGemini.isReanalysis || false,
+        hasConversationContext: !!conversationContext,
+      });
 
       // === Call Gemini API (REAL IMPLEMENTATION) ===
       console.log(`🔮 Calling Gemini API with model: gemini-2.5-flash...`);
-      const prompt = generateAnalysisPrompt(dataForGemini);
+      console.log(`📤 Prompt type: ${conversationContext && isReanalysis ? 'CONVERSATION-BASED' : 'INITIAL MESSAGE'}`);
       const geminiResponse = await analyzeTicketWithGemini(dataForGemini, prompt);
       console.log(`✅ Gemini API response received`);
       console.log(`📋 Raw Gemini Output:`, geminiResponse);
@@ -143,6 +187,9 @@ export async function POST(request) {
         'aiAnalysis.suggestedResponse': aiResults.suggestedResponse,
         'aiAnalysis.suggestedCategory': aiResults.category,
         'aiAnalysis.error': null,
+        'aiAnalysis.reprocessRequested': false, // ✅ Clear reprocess flag
+        'aiAnalysis.reprocessCount': (ticketData.aiAnalysis?.reprocessCount || 0) + (isReprocess ? 1 : 0), // ✅ Track reprocess count
+        'aiAnalysis.lastProcessedAt': now, // ✅ Track last processing time
         updatedAt: now,
       };
 
@@ -176,12 +223,19 @@ export async function POST(request) {
         console.log(`✅ VERIFIED: AI analysis successfully saved to Firebase!`);
         
         // Print beautiful summary box
+        const analysisType = savedData.aiAnalysis.reprocessCount > 0 ? '🔄 RE-ANALYZED' : '🆕 FIRST ANALYSIS';
+        const reprocessInfo = savedData.aiAnalysis.reprocessCount > 0 
+          ? `║ Reprocess Count: ${savedData.aiAnalysis.reprocessCount}${' '.repeat(42)} ║\n`
+          : '';
+        
         console.log(`\n╔════════════════════════════════════════════════════════════════╗`);
         console.log(`║           🎯 AI ANALYSIS COMPLETED & SAVED                    ║`);
         console.log(`╠════════════════════════════════════════════════════════════════╣`);
+        console.log(`║ Type:            ${analysisType.padEnd(42)} ║`);
         console.log(`║ Ticket ID:       ${ticketId.padEnd(42)} ║`);
         console.log(`║ Status:          ✅ DONE ${' '.repeat(39)} ║`);
         console.log(`║                                                                ║`);
+        if (reprocessInfo) console.log(reprocessInfo);
         console.log(`║ 📊 AI Analysis Results:                                        ║`);
         console.log(`║ ──────────────────────────────────────────────────────────────║`);
         console.log(`║ Mood:            ${savedData.aiAnalysis.mood.padEnd(42)} ║`);
