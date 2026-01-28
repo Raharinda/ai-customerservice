@@ -20,7 +20,7 @@ export default function RequestList({
     if (error) {
         return (
             <div className='p-4 bg-red-50 border border-red-200 rounded-lg'>
-                <p className='text-red-800'>❌ {error}</p>
+                <p className='text-red-800'>{error}</p>
                 <button
                     onClick={onRefresh}
                     className='mt-2 text-sm text-red-600 hover:text-red-800 underline'

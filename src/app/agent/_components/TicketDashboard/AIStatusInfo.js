@@ -1,6 +1,9 @@
 // app/agent/_components/TicketsDashboard/AIStatusInfo.jsx
 
 import React from 'react'
+import { CiClock2 } from 'react-icons/ci'
+import { FaRegClock } from 'react-icons/fa6'
+import { TbClockHour3Filled } from 'react-icons/tb'
 
 /**
  * AIStatusInfo Component
@@ -19,21 +22,21 @@ export default function AIStatusInfo({ tickets }) {
     return (
         <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
             <h3 className='text-sm font-semibold text-blue-900 mb-2'>
-                🤖 AI Analysis Status
+                AI Analysis Status
             </h3>
             <div className='flex gap-4 text-sm'>
-                <span className='text-purple-700'>
-                    ⏳ Pending: {aiStatusCounts.pending}
+                <span className='text-purple-700 flex'>
+                    Pending: {aiStatusCounts.pending}
                 </span>
                 <span className='text-blue-700'>
-                    🔄 Processing: {aiStatusCounts.processing}
+                    Processing: {aiStatusCounts.processing}
                 </span>
                 <span className='text-green-700'>
-                    ✅ Done: {aiStatusCounts.done}
+                    Done: {aiStatusCounts.done}
                 </span>
                 {aiStatusCounts.error > 0 && (
                     <span className='text-red-700'>
-                        ❌ Error: {aiStatusCounts.error}
+                        Error: {aiStatusCounts.error}
                     </span>
                 )}
             </div>

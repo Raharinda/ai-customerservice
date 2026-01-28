@@ -36,7 +36,7 @@ export default function AgentRequestItem({ request, onClick }) {
             className='flex bg-white rounded-xl shadow border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg hover:shadow-gray-300 transition-shadow'
         >
             {/* Strip Color - Based on AI Urgency */}
-            <div className={`w-2 ${stripColor} flex-shrink-0`} />
+            <div className={`w-2 ${stripColor} shrink-0`} />
 
             {/* Content */}
             <div className='flex-1 p-4 space-y-3'>

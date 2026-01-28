@@ -7,15 +7,18 @@ import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 // Import modular components
-import PageHeader from './_components/PageHeader'
-import TicketSidebar from './_components/TicketSidebar'
-import ConversationHeader from './_components/ConversationHeader'
-import TicketActionButtons from './_components/TicketActionButtons'
-import AIAnalysisCard from './_components/AIAnalysisCard'
-import MessageList from './_components/MessageList'
-import MessageInput from './_components/MessageInput'
-import LoadingState from './_components/LoadingState'
-import ErrorState from './_components/ErrorState'
+import PageHeader from './_components/layout/PageHeader'
+import TicketSidebar from './_components/layout/TicketSidebar'
+import ConversationHeader from './_components/layout/ConversationHeader'
+
+import TicketActionButtons from './_components/actions/TicketActionButtons'
+import AIAnalysisCard from './_components/ai/AIAnalysisCard'
+
+import MessageList from './_components/messages/MessageList'
+import MessageInput from './_components/messages/MessageInput'
+
+import LoadingState from './_components/states/LoadingState'
+import ErrorState from './_components/states/ErrorState'
 
 /**
  * TicketDetailPage - Main Component

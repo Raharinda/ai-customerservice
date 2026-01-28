@@ -2,16 +2,17 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRequests } from '@/hooks/shared/useRequests'
-import { useMessages } from '@/hooks/customer/useMessages'
-import { useAuth } from '@/contexts/AuthContext'
+import AuthButton from '@/components/auth/AuthButton'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+
+import { useTicketMessages } from '@/hooks/shared/useTicketMessages'
+import { useRequests } from '@/hooks/shared/useRequests'
+import { useAuth } from '@/contexts/AuthContext'
 
 import { RequestList, FormRequest } from './_components/RequestSection'
 import { MessageDetail } from './_components/MessageSection'
-import AuthButton from './auth/_components/AuthButton'
-import SearchBar from './_components/SearchBar'
-import { useTicketMessages } from '@/hooks/shared/useTicketMessages'
+import SearchBar from '@/components/layout/SearchBar'
+import { useTicketSearch } from '@/hooks/shared/useTicketSearch'
 
 export default function CustomerPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)
@@ -42,6 +43,8 @@ export default function CustomerPage() {
         setSelectedRequest(null)
         refreshRequests()
     }
+
+    const { query, setQuery, results } = useTicketSearch()
 
     if (selectedRequest) {
         return (
@@ -81,7 +84,11 @@ export default function CustomerPage() {
                     </div>
                 </div>
 
-                <SearchBar />
+                <SearchBar
+                    value={query}
+                    onChange={setQuery}
+                    placeholder='Search your tickets...'
+                />
 
                 <div className=' mx-auto p-4 h-screen flex flex-col'>
                     {!selectedRequest ? (
