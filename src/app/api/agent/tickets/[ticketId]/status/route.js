@@ -127,7 +127,7 @@ export async function PATCH(request, { params }) {
             )
         }
 
-        console.log(`📝 Status change: ${oldStatus} → ${newStatus}`)
+        console.log(`Status change: ${oldStatus} → ${newStatus}`)
 
         // === UPDATE TICKET ===
         const now = new Date().toISOString()
@@ -164,7 +164,7 @@ export async function PATCH(request, { params }) {
 
         await ticketRef.update(updateData)
 
-        console.log(`✅ Ticket ${ticketId} status updated`)
+        console.log(`Ticket ${ticketId} status updated`)
 
         // === CREATE SYSTEM MESSAGE ===
         const systemMessage = getStatusChangeMessage(
@@ -193,7 +193,7 @@ export async function PATCH(request, { params }) {
 
         await ticketRef.collection('messages').add(messageData)
 
-        console.log(`✅ System message created`)
+        console.log(`System message created`)
 
         // === UPDATE MESSAGE COUNT ===
         await ticketRef.update({
@@ -216,7 +216,7 @@ export async function PATCH(request, { params }) {
             { status: 200 },
         )
     } catch (error) {
-        console.error('❌ Error updating ticket status:', error)
+        console.error('Error updating ticket status:', error)
         return NextResponse.json(
             {
                 error: 'Internal server error',
@@ -233,18 +233,18 @@ export async function PATCH(request, { params }) {
  */
 function getStatusChangeMessage(oldStatus, newStatus, agentName) {
     const messages = {
-        'open->in-progress': `🔵 ${agentName} started working on this ticket`,
-        'open->resolved': `✅ ${agentName} marked this ticket as resolved`,
-        'in-progress->resolved': `✅ ${agentName} marked this ticket as resolved`,
-        'in-progress->open': `🔄 ${agentName} moved this ticket back to open`,
-        'resolved->closed': `🔒 ${agentName} closed this ticket`,
-        'resolved->in-progress': `🔄 ${agentName} reopened this ticket`,
-        'closed->in-progress': `🔄 ${agentName} reopened this closed ticket`,
+        'open->in-progress': `${agentName} started working on this ticket`,
+        'open->resolved': `${agentName} marked this ticket as resolved`,
+        'in-progress->resolved': `${agentName} marked this ticket as resolved`,
+        'in-progress->open': `${agentName} moved this ticket back to open`,
+        'resolved->closed': `${agentName} closed this ticket`,
+        'resolved->in-progress': `${agentName} reopened this ticket`,
+        'closed->in-progress': `${agentName} reopened this closed ticket`,
     }
 
     const key = `${oldStatus}->${newStatus}`
     return (
         messages[key] ||
-        `📝 ${agentName} changed ticket status from ${oldStatus} to ${newStatus}`
+        `${agentName} changed ticket status from ${oldStatus} to ${newStatus}`
     )
 }

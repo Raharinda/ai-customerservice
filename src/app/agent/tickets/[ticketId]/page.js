@@ -75,7 +75,7 @@ export default function TicketDetailPage() {
                 throw new Error(data.error || 'Failed to update status')
             }
 
-            console.log('✅ Status updated successfully:', data)
+            console.log('Status updated successfully:', data)
 
             // Refresh ticket data
             await refresh()
@@ -84,7 +84,7 @@ export default function TicketDetailPage() {
             alert(
                 `Ticket status updated to "${newStatus}" successfully! ${
                     newStatus === 'resolved'
-                        ? '🎉 Great job resolving the customer issue!'
+                        ? 'Great job resolving the customer issue!'
                         : ''
                 }`,
             )
