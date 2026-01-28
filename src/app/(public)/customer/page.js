@@ -13,7 +13,7 @@ import AuthButton from './auth/_components/AuthButton'
 import SearchBar from './_components/SearchBar'
 import { useTicketMessages } from '@/hooks/shared/useTicketMessages'
 
-export default function RequestPage() {
+export default function CustomerPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)
     const { requests, loading, error, refreshRequests } = useRequests()
     const { user } = useAuth()
