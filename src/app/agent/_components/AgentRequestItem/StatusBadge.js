@@ -1,5 +1,4 @@
 // app/agent/_components/AgentRequestItem/StatusBadge.jsx
-
 import React from 'react'
 import { FaCheck, FaRobot } from 'react-icons/fa6'
 import { GrInProgress } from 'react-icons/gr'
@@ -11,7 +10,7 @@ import {
     STATUS_CONFIGS,
     URGENCY_CONFIGS,
     AI_STATUS_CONFIGS,
-} from '../shared/constants'
+} from '@/utils/messageHelpers'
 
 /**
  * Get status icon based on ticket status
@@ -19,6 +18,7 @@ import {
 const getStatusIcon = (status) => {
     const icons = {
         pending: <IoTimeOutline className='w-4 h-4' />,
+        open: <IoTimeOutline className='w-4 h-4' />,
         'in-progress': <GrInProgress className='w-4 h-4' />,
         resolved: <FaCheck className='w-4 h-4' />,
         closed: <IoMdClose className='w-4 h-4' />,
@@ -34,7 +34,6 @@ const getUnifiedBadgeConfig = (aiAnalysis, ticketStatus) => {
     if (aiAnalysis?.status === 'done') {
         const urgency = aiAnalysis.urgency
         const config = URGENCY_CONFIGS[urgency] || URGENCY_CONFIGS.medium
-
         return {
             ...config,
             label: `${config.emoji} ${config.label} (${aiAnalysis.urgencyScore})`,
@@ -83,7 +82,6 @@ const getUnifiedBadgeConfig = (aiAnalysis, ticketStatus) => {
  */
 export default function StatusBadge({ aiAnalysis, ticketStatus }) {
     const badge = getUnifiedBadgeConfig(aiAnalysis, ticketStatus)
-
     return (
         <span
             className={`${badge.bg} ${badge.text} border ${badge.border} px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1`}

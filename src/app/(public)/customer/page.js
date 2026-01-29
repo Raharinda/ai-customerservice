@@ -4,20 +4,28 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import AuthButton from '@/components/auth/AuthButton'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
-
 import { useTicketMessages } from '@/hooks/shared/useTicketMessages'
 import { useRequests } from '@/hooks/shared/useRequests'
 import { useAuth } from '@/contexts/AuthContext'
-
 import { RequestList, FormRequest } from './_components/RequestSection'
 import { MessageDetail } from './_components/MessageSection'
 import SearchBar from '@/components/layout/SearchBar'
-import { useTicketSearch } from '@/hooks/shared/useTicketSearch'
 
+/**
+ * Customer Page - Ticket Management Portal
+ *
+ * Features:
+ * ✅ View all tickets
+ * ✅ Create new tickets
+ * ✅ Search tickets with dropdown
+ * ✅ Real-time message conversations
+ * ✅ Auto-locked chat for resolved/closed tickets
+ */
 export default function CustomerPage() {
     const [selectedRequest, setSelectedRequest] = useState(null)
     const { requests, loading, error, refreshRequests } = useRequests()
     const { user } = useAuth()
+
     const {
         messages,
         loading: messagesLoading,
@@ -44,8 +52,12 @@ export default function CustomerPage() {
         refreshRequests()
     }
 
-    const { query, setQuery, results } = useTicketSearch()
+    // Handle search result selection
+    const handleSelectSearchResult = (ticket) => {
+        setSelectedRequest(ticket)
+    }
 
+    // If viewing a specific ticket/request
     if (selectedRequest) {
         return (
             <MessageDetail
@@ -65,51 +77,50 @@ export default function CustomerPage() {
             requiredRole='customer'
             unauthRedirect='/customer/auth/login'
         >
-            <div>
+            <div className='min-h-screen bg-gray-50'>
                 {/* Navbar */}
-                <div className='flex flex-col gap-4 p-5 shadow-sm justify-between'>
-                    <div className='flex items-center justify-between'>
-                        {/* Left Side */}
-                        <div>
-                            <h1 className='text-xl font-bold'>
-                                <Link href='/'>Support AI</Link>
-                            </h1>
-                        </div>
-
-                        {/* Right Side */}
-                        <div className='flex gap-2'>
-                            <FormRequest />
-                            <AuthButton />
+                <header className='bg-white shadow-sm'>
+                    <div className='flex flex-col gap-4 p-5 justify-between'>
+                        <div className='flex items-center justify-between'>
+                            {/* Left Side */}
+                            <div>
+                                <h1 className='text-xl font-bold'>
+                                    <Link href='/'>Support AI</Link>
+                                </h1>
+                                <p className='text-sm text-gray-500 mt-1'>
+                                    Welcome, {user?.displayName || user?.email}
+                                </p>
+                            </div>
+                            {/* Right Side */}
+                            <div className='flex gap-2'>
+                                <FormRequest
+                                    onRequestCreated={handleRequestCreated}
+                                />
+                                <AuthButton />
+                            </div>
                         </div>
                     </div>
-                </div>
+                </header>
 
-                <SearchBar
-                    value={query}
-                    onChange={setQuery}
-                    placeholder='Search your tickets...'
-                />
+                {/* Main Content */}
+                <main className='max-w-7xl mx-auto px-4 py-6'>
+                    {/* Search Bar */}
+                    <SearchBar
+                        tickets={requests}
+                        onSelectTicket={handleSelectSearchResult}
+                        placeholder='Search your tickets by subject or number...'
+                        className='mb-6'
+                    />
 
-                <div className=' mx-auto p-4 h-screen flex flex-col'>
-                    {!selectedRequest ? (
-                        <RequestList
-                            requests={requests}
-                            loading={loading}
-                            error={error}
-                            onRefresh={refreshRequests}
-                            onSelectRequest={handleSelectRequest}
-                        />
-                    ) : (
-                        <MessageDetail
-                            request={selectedRequest}
-                            messages={messages}
-                            loading={messagesLoading}
-                            sending={sending}
-                            onSendMessage={sendMessage}
-                            onBack={handleBack}
-                        />
-                    )}
-                </div>
+                    {/* Request List */}
+                    <RequestList
+                        requests={requests}
+                        loading={loading}
+                        error={error}
+                        onRefresh={refreshRequests}
+                        onSelectRequest={handleSelectRequest}
+                    />
+                </main>
             </div>
         </ProtectedRoute>
     )

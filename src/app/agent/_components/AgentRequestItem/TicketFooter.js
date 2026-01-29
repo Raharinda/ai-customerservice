@@ -1,7 +1,6 @@
 // app/agent/_components/AgentRequestItem/TicketFooter.jsx
-
 import React from 'react'
-import TimeDisplay from '../shared/TimeDisplay'
+import { formatDate } from '@/utils/messageHelpers'
 
 /**
  * TicketFooter Component
@@ -12,7 +11,7 @@ export default function TicketFooter({ category, createdAt }) {
         <div className='flex items-center gap-2 text-xs text-gray-500'>
             <span className='bg-gray-100 px-2 py-1 rounded'>{category}</span>
             <span>•</span>
-            <TimeDisplay timestamp={createdAt} />
+            <span>{formatDate(createdAt)}</span>
         </div>
     )
 }

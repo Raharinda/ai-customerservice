@@ -39,26 +39,24 @@ export default function StatsCards({ tickets }) {
 
             {/* Critical Urgency */}
             <div className='bg-red-50 p-4 rounded-lg shadow border border-red-200'>
-                <h3 className='text-sm font-medium text-red-700'>
-                    🚨 Critical
-                </h3>
+                <h3 className='text-sm font-medium text-red-700'>Critical</h3>
                 <p className='text-3xl font-bold text-red-900 mt-2'>
                     {urgencyCounts.critical}
                 </p>
             </div>
 
             {/* High Urgency */}
-            <div className='bg-orange-50 p-4 rounded-lg shadow border border-orange-200'>
-                <h3 className='text-sm font-medium text-orange-700'>⚠️ High</h3>
+            <div className='bg-yellow-50 p-4 rounded-lg shadow border border-yellow-200'>
+                <h3 className='text-sm font-medium text-orange-700'>High</h3>
                 <p className='text-3xl font-bold text-orange-900 mt-2'>
                     {urgencyCounts.high}
                 </p>
             </div>
 
             {/* AI Processing */}
-            <div className='bg-purple-50 p-4 rounded-lg shadow border border-purple-200'>
+            <div className='bg-blue-50 p-4 rounded-lg shadow border border-blue-200'>
                 <h3 className='text-sm font-medium text-purple-700'>
-                    🤖 AI Analyzed
+                    AI Analyzed
                 </h3>
                 <p className='text-3xl font-bold text-purple-900 mt-2'>
                     {aiStatusCounts.done}

@@ -5,7 +5,7 @@ import StatusBadge from './StatusBadge'
 import TicketHeader from './TicketHeader'
 import TicketFooter from './TicketFooter'
 import AIAnalysisSection from './AIAnalysisSection'
-import { URGENCY_CONFIGS, AI_STATUS_CONFIGS } from '../shared/constants'
+import { URGENCY_CONFIGS, AI_STATUS_CONFIGS } from '@/utils/messageHelpers'
 
 /**
  * Get strip color based on AI analysis status

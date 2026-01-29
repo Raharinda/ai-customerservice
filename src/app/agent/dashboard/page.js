@@ -2,10 +2,9 @@
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
-import SearchBar from '../_components/SearchBar'
+import SearchBar from '@/components/layout/SearchBar'
 import AuthButton from '@/components/auth/AuthButton'
 import Link from 'next/link'
-
 import { useRouter } from 'next/navigation'
 import { useTicketsData } from '@/hooks/agent/useTicketsData'
 import { useTicketFilters } from '@/hooks/agent/useTicketFilters'
@@ -24,14 +23,8 @@ import {
  * ✅ AI Analysis results for each ticket
  * ✅ Filter by urgency (critical/high/medium/low)
  * ✅ Filter by status (pending/in-progress/resolved)
+ * ✅ Advanced search with dropdown results
  * ✅ Protected route (only agents can access)
- *
- * HOW IT WORKS:
- * 1. Agent login
- * 2. Dashboard shows all tickets with AI analysis
- * 3. Real-time updates via Firestore listener
- * 4. AI analysis status: pending → processing → done
- * 5. Urgency-based prioritization for agents
  */
 export default function AgentDashboard() {
     const { user, loading } = useAuth()
@@ -52,6 +45,11 @@ export default function AgentDashboard() {
 
     // Handle ticket click
     const handleViewTicket = (ticket) => {
+        router.push(`/agent/tickets/${ticket.ticketId}`)
+    }
+
+    // Handle search result selection
+    const handleSelectSearchResult = (ticket) => {
         router.push(`/agent/tickets/${ticket.ticketId}`)
     }
 
@@ -93,7 +91,6 @@ export default function AgentDashboard() {
                                     | Support Agent
                                 </p>
                             </div>
-
                             <AuthButton />
                         </div>
                     </div>
@@ -101,8 +98,13 @@ export default function AgentDashboard() {
 
                 {/* Main Content */}
                 <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='p-4 mb-6'>
-                        <SearchBar />
+                    {/* Search Bar */}
+                    <div className='mb-6'>
+                        <SearchBar
+                            tickets={tickets}
+                            onSelectTicket={handleSelectSearchResult}
+                            placeholder='Search tickets by subject, number, or customer...'
+                        />
                     </div>
 
                     {/* Tickets Dashboard with AI Analysis */}

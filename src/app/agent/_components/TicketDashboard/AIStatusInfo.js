@@ -1,9 +1,6 @@
 // app/agent/_components/TicketsDashboard/AIStatusInfo.jsx
 
 import React from 'react'
-import { CiClock2 } from 'react-icons/ci'
-import { FaRegClock } from 'react-icons/fa6'
-import { TbClockHour3Filled } from 'react-icons/tb'
 
 /**
  * AIStatusInfo Component

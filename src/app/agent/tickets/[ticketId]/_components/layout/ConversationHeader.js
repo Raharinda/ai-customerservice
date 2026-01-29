@@ -16,7 +16,7 @@ export default function ConversationHeader({ messagesCount, analyzing }) {
                     </h2>
                     <p className='text-xs text-gray-600 mt-1'>
                         {analyzing
-                            ? '🤖 AI is analyzing conversation...'
+                            ? 'AI is analyzing conversation...'
                             : 'AI updates automatically with new messages'}
                     </p>
                 </div>

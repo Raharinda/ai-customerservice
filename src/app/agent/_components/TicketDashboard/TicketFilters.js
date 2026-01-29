@@ -1,11 +1,10 @@
 // app/agent/_components/TicketsDashboard/TicketFilters.jsx
-
 import React from 'react'
 import {
     STATUS_FILTERS,
     URGENCY_FILTERS,
     URGENCY_CONFIGS,
-} from '../shared/constants'
+} from '@/utils/messageHelpers'
 
 /**
  * FilterButton Component
@@ -13,7 +12,6 @@ import {
 function FilterButton({ active, onClick, children, variant = 'default' }) {
     const baseClasses =
         'px-4 py-2 rounded-lg text-sm font-medium transition-colors'
-
     const variantClasses = {
         default: active
             ? 'bg-blue-500 text-white'
@@ -31,7 +29,6 @@ function FilterButton({ active, onClick, children, variant = 'default' }) {
             ? 'bg-green-500 text-white'
             : 'bg-green-100 text-green-700 hover:bg-green-200',
     }
-
     return (
         <button
             onClick={onClick}
@@ -51,7 +48,7 @@ export default function TicketFilters({
     setFilter,
     urgencyFilter,
     setUrgencyFilter,
-    urgencyCounts,
+    urgencyCounts = {},
 }) {
     return (
         <div className='bg-white p-4 rounded-lg shadow border border-gray-200'>
@@ -62,15 +59,13 @@ export default function TicketFilters({
                         Filter by Status
                     </h3>
                     <div className='flex flex-wrap gap-2'>
-                        {STATUS_FILTERS.map((status) => (
+                        {STATUS_FILTERS.map((statusOption) => (
                             <FilterButton
-                                key={status}
-                                active={filter === status}
-                                onClick={() => setFilter(status)}
+                                key={statusOption.value}
+                                active={filter === statusOption.value}
+                                onClick={() => setFilter(statusOption.value)}
                             >
-                                {status === 'all'
-                                    ? 'All'
-                                    : status.replace('-', ' ')}
+                                {statusOption.label}
                             </FilterButton>
                         ))}
                     </div>
@@ -88,20 +83,27 @@ export default function TicketFilters({
                         >
                             All Urgency
                         </FilterButton>
-                        {URGENCY_FILTERS.filter((u) => u !== 'all').map(
-                            (urgency) => {
-                                const config = URGENCY_CONFIGS[urgency]
+                        {URGENCY_FILTERS.filter((u) => u.value !== 'all').map(
+                            (urgencyOption) => {
+                                const config =
+                                    URGENCY_CONFIGS[urgencyOption.value]
+                                const count =
+                                    urgencyCounts[urgencyOption.value] || 0
                                 return (
                                     <FilterButton
-                                        key={urgency}
-                                        active={urgencyFilter === urgency}
-                                        onClick={() =>
-                                            setUrgencyFilter(urgency)
+                                        key={urgencyOption.value}
+                                        active={
+                                            urgencyFilter ===
+                                            urgencyOption.value
                                         }
-                                        variant={urgency}
+                                        onClick={() =>
+                                            setUrgencyFilter(
+                                                urgencyOption.value,
+                                            )
+                                        }
+                                        variant={urgencyOption.value}
                                     >
-                                        {config.emoji} {config.label} (
-                                        {urgencyCounts[urgency]})
+                                        {config.emoji} {config.label} ({count})
                                     </FilterButton>
                                 )
                             },
