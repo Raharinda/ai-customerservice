@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { FcGoogle } from 'react-icons/fc'
+import Link from 'next/link'
 
 export default function LoginForm() {
     const [email, setEmail] = useState('')
@@ -144,12 +145,12 @@ export default function LoginForm() {
 
                 <p className='mt-4 text-center text-sm text-gray-600'>
                     Belum punya akun?{' '}
-                    <a
-                        href='/register'
+                    <Link
+                        href='/customer/auth/register'
                         className='text-blue-600 hover:text-blue-700 font-medium'
                     >
                         Daftar di sini
-                    </a>
+                    </Link>
                 </p>
 
                 <div className='mt-4 pt-4 border-t border-gray-200'>
