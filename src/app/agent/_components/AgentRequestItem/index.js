@@ -65,6 +65,7 @@ export default function AgentRequestItem({ request, onClick }) {
                 <TicketFooter
                     category={request.category}
                     createdAt={request.createdAt}
+                    status={request.status}
                 />
             </div>
         </div>

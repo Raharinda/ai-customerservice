@@ -97,7 +97,13 @@ export default function AgentDashboard() {
 
                             <div className='flex gap-5'>
                                 <AuthButton />
-                                <TicketFilterButton />
+                                <TicketFilterButton
+                                    filter={filter}
+                                    setFilter={setFilter}
+                                    urgencyFilter={urgencyFilter}
+                                    setUrgencyFilter={setUrgencyFilter}
+                                    urgencyCounts={urgencyCounts}
+                                />
                             </div>
                         </div>
                     </div>

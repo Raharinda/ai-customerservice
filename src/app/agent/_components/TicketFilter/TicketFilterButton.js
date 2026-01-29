@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import TicketFilterOverlay from './TicketFilterOverlay'
-import { CiFilter } from 'react-icons/ci'
 import { GrFilter } from 'react-icons/gr'
 
 export default function TicketFilterButton({
@@ -18,9 +17,12 @@ export default function TicketFilterButton({
         <div>
             <button
                 onClick={() => setOpen(true)}
-                className='flex items-center gap-2 px-4 py-2 bg-blue-500 border-2 border-transparent rounded-lg text-sm hover:bg-blue-700 transition-all'
+                className='flex items-center gap-2 px-4 py-2
+                           bg-blue-500 border-2 border-transparent
+                           rounded-lg text-sm
+                           hover:bg-blue-700 transition-all'
             >
-                <GrFilter className='text-lg' color='white' />
+                <GrFilter className='text-lg text-white' />
                 <span className='text-white font-medium'>Filters</span>
             </button>
 

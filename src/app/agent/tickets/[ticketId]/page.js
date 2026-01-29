@@ -216,7 +216,7 @@ export default function TicketDetailPage() {
                                     disabled={sending || statusUpdating}
                                     placeholder={
                                         ticket.status === 'closed'
-                                            ? 'This ticket is closed. Reopen to send messages.'
+                                            ? 'This ticket is closed.'
                                             : 'Type your response...'
                                     }
                                 />
