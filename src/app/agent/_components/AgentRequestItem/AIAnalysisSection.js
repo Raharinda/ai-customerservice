@@ -1,14 +1,13 @@
 // app/agent/_components/AgentRequestItem/AIAnalysisSection.jsx
-
 import React from 'react'
 import { FaRobot } from 'react-icons/fa6'
 import { useTicketAnalysis } from '@/hooks/agent/useTicketAnalysis'
 
 /**
  * AIAnalysisSection Component
- * Displays AI analysis results when available
+ * Displays AI analysis results with ticket subject
  */
-export default function AIAnalysisSection({ ticketId, aiAnalysis }) {
+export default function AIAnalysisSection({ ticketId, subject, aiAnalysis }) {
     const { reanalyzeTicket, isAnalyzing } = useTicketAnalysis()
 
     // Only show if analysis is done
@@ -53,7 +52,7 @@ export default function AIAnalysisSection({ ticketId, aiAnalysis }) {
                     {aiAnalysis.mood && (
                         <div className='flex items-center gap-1'>
                             <span className='text-gray-600'>Mood:</span>
-                            <span className='text-blue-700 font-medium'>
+                            <span className='text-blue-700 font-medium capitalize'>
                                 {aiAnalysis.mood}
                             </span>
                         </div>
@@ -61,7 +60,7 @@ export default function AIAnalysisSection({ ticketId, aiAnalysis }) {
                     {aiAnalysis.sentiment && (
                         <div className='flex items-center gap-1'>
                             <span className='text-gray-600'>Sentiment:</span>
-                            <span className='text-blue-700 font-medium'>
+                            <span className='text-blue-700 font-medium capitalize'>
                                 {aiAnalysis.sentiment}
                             </span>
                         </div>
@@ -72,18 +71,8 @@ export default function AIAnalysisSection({ ticketId, aiAnalysis }) {
             {/* Summary */}
             {aiAnalysis.summary && (
                 <div className='text-sm'>
-                    <span className='text-gray-600'>📝 Summary:</span>
+                    <span className='text-gray-600 font-medium'>Summary:</span>
                     <p className='text-gray-800 mt-1'>{aiAnalysis.summary}</p>
-                </div>
-            )}
-
-            {/* Suggested Response */}
-            {aiAnalysis.suggestedResponse && (
-                <div className='text-sm'>
-                    <span className='text-gray-600'>💬 Suggested Reply:</span>
-                    <p className='text-gray-800 mt-1 italic'>
-                        {aiAnalysis.suggestedResponse}
-                    </p>
                 </div>
             )}
         </div>

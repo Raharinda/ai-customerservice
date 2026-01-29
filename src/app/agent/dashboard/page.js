@@ -13,8 +13,9 @@ import {
     TicketsList,
     StatsCards,
     AIStatusInfo,
-    TicketFilters,
 } from '../_components/TicketDashboard'
+import { useState } from 'react'
+import TicketFilterButton from '../_components/TicketFilter/TicketFilterButton'
 
 /**
  * Agent Dashboard - AI-Powered Ticket Management
@@ -52,6 +53,8 @@ export default function AgentDashboard() {
     const handleSelectSearchResult = (ticket) => {
         router.push(`/agent/tickets/${ticket.ticketId}`)
     }
+
+    const [showFilters, setShowFilters] = useState(false)
 
     if (loading) {
         return (
@@ -91,7 +94,11 @@ export default function AgentDashboard() {
                                     | Support Agent
                                 </p>
                             </div>
-                            <AuthButton />
+
+                            <div className='flex gap-5'>
+                                <AuthButton />
+                                <TicketFilterButton />
+                            </div>
                         </div>
                     </div>
                 </header>
@@ -115,14 +122,16 @@ export default function AgentDashboard() {
                         {/* AI Status Info */}
                         <AIStatusInfo tickets={tickets} />
 
-                        {/* Filters */}
-                        <TicketFilters
-                            filter={filter}
-                            setFilter={setFilter}
-                            urgencyFilter={urgencyFilter}
-                            setUrgencyFilter={setUrgencyFilter}
-                            urgencyCounts={urgencyCounts}
-                        />
+                        {showFilters && (
+                            <TicketFilterButton
+                                filter={filter}
+                                setFilter={setFilter}
+                                urgencyFilter={urgencyFilter}
+                                setUrgencyFilter={setUrgencyFilter}
+                                urgencyCounts={urgencyCounts}
+                                onClose={() => setShowFilters(false)}
+                            />
+                        )}
 
                         {/* Tickets List */}
                         <TicketsList
