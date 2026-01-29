@@ -10,7 +10,7 @@ export default function Home() {
             {/* Navbar */}
             <nav className='flex justify-between p-5 font-bold text-xl shadow'>
                 <h1 className='cursor-pointer hover:text-blue-600 transition-opacity delay-300'>
-                    SupportAI
+                    Support AI
                 </h1>
             </nav>
 
