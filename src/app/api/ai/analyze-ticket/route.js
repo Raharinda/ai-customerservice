@@ -272,10 +272,26 @@ export async function POST(request) {
       // === STEP 6: Handle ERROR ===
       console.error(`❌ AI Analysis error for ticket ${ticketId}:`, aiError.message);
 
+      // ✅ Check if error is quota-related and all keys exhausted
+      const isQuotaExhausted = 
+        aiError.message.includes('quota') ||
+        aiError.message.includes('rate limit') ||
+        aiError.message.includes('All API keys exhausted');
+
+      // Determine final status
+      const finalStatus = isQuotaExhausted ? 'skipped' : 'error';
+      
+      console.log(`📊 Setting AI status to: ${finalStatus}`);
+      
+      if (isQuotaExhausted) {
+        console.log(`⚠️ All Gemini API keys quota exhausted - marking as SKIPPED`);
+      }
+
       await ticketRef.update({
-        'aiAnalysis.status': 'error',
+        'aiAnalysis.status': finalStatus,
         'aiAnalysis.processedAt': now,
         'aiAnalysis.error': aiError.message || 'AI analysis failed',
+        'aiAnalysis.isQuotaExhausted': isQuotaExhausted,
         updatedAt: now,
       });
 
@@ -283,6 +299,7 @@ export async function POST(request) {
         success: false,
         error: 'AI analysis failed',
         details: aiError.message,
+        status: finalStatus,
       }, { status: 500 });
     }
 
