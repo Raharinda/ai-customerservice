@@ -145,7 +145,7 @@ export default function LoginForm() {
                 <p className='mt-4 text-center text-sm text-gray-600'>
                     Belum punya akun?{' '}
                     <a
-                        href='/customer/auth/register'
+                        href='/register'
                         className='text-blue-600 hover:text-blue-700 font-medium'
                     >
                         Daftar di sini
