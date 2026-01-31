@@ -1,6 +1,6 @@
 # AI-Powered Customer Service Platform
 
-> Platform layanan pelanggan berbasis AI dengan analisis pesan otomatis, klasifikasi masalah, pemahaman sentimen, dan saran respons cerdas.
+> An AI-powered customer service platform with automatic message analysis, issue classification, sentiment understanding, and intelligent response suggestions.
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://reactjs.org/)
@@ -11,77 +11,70 @@
 
 ## 📑 Table of Contents
 
-- [Tentang Proyek](#-tentang-proyek)
-- [Fitur Utama](#-fitur-utama)
+- [About the Project](#-about-the-project)
+- [Key Features](#-key-features)
 - [Tech Stack](#-tech-stack)
-- [Cara Penggunaan](#-cara-penggunaan)
-- [Screenshot](#-screenshot)
-- [Lisensi](#-lisensi)
+- [How to Use](#-how-to-use)
+- [Screenshots](#-screenshots)
+- [License](#-license)
 
 ---
 
-## 📖 Tentang Proyek
+## 📖 About the Project
 
-**AI-Powered Customer Service** adalah platform layanan pelanggan modern yang memanfaatkan kecerdasan buatan untuk membantu bisnis memberikan support yang lebih cepat dan efisien. Platform ini dirancang dengan dua portal terpisah: satu untuk pelanggan dan satu untuk agent support.
+**AI-Powered Customer Service** is a modern customer service platform that leverages artificial intelligence to help businesses provide faster and more efficient support. The platform is designed with two separate portals: one for customers and one for support agents.
 
-### Mengapa Proyek Ini?
+### Why This Project?
 
-- **Otomasi Cerdas**: AI membantu mengklasifikasikan dan memprioritaskan tiket secara otomatis
-- **Respon Lebih Cepat**: Agent mendapat saran jawaban dari AI
-- **Pengalaman Terbaik**: Interface yang clean dan mudah digunakan
-- **Skalabilitas**: Mampu menangani ribuan tiket dengan performa optimal
+- **Intelligent Automation**: AI helps classify and prioritize tickets automatically
+- **Faster Response**: Agents receive AI-powered answer suggestions
+- **Best Experience**: Clean and user-friendly interface
+- **Scalability**: Capable of handling thousands of tickets with optimal performance
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Key Features
 
-### 👤 Portal Pelanggan
+### 👤 Customer Portal
+- 📝 **Create Support Tickets** - Submit issues with clear categories
+- 💬 **Real-time Chat** - Direct communication with agents
+- 📊 **Status Tracking** - Monitor your ticket progress
+- 🔔 **Notifications** - Get updates when there are replies
 
-- 📝 **Buat Tiket Support** - Submit masalah dengan kategori yang jelas
-- 💬 **Real-time Chat** - Komunikasi langsung dengan agent
-- 📊 **Tracking Status** - Pantau progress tiket Anda
-- 🔔 **Notifikasi** - Dapatkan update saat ada balasan
+### 👨‍💼 Agent Portal
+- 🎫 **Unified Dashboard** - Manage all tickets in one place
+- 🤖 **AI Assistant** - AI-powered automatic response suggestions
+- 🏷️ **Auto-Classification** - Automatic category and priority assignment
+- 😊 **Sentiment Analysis** - Detect customer emotions
+- 📈 **Analytics** - Statistics and performance reports
 
-### 👨‍💼 Portal Agent
-
-- 🎫 **Dashboard Terpadu** - Kelola semua tiket dalam satu tempat
-- 🤖 **AI Assistant** - Saran respons otomatis berbasis AI
-- 🏷️ **Auto-Classification** - Kategori dan prioritas otomatis
-- 😊 **Sentiment Analysis** - Deteksi emosi pelanggan
-- 📈 **Analytics** - Statistik dan laporan performa
-
-### 🔐 Keamanan
-
-- **Autentikasi Ganda** - Login terpisah untuk customer dan agent
-- **Role-Based Access** - Pembatasan akses berdasarkan peran
-- **Agent Key System** - Verifikasi tambahan untuk agent
-- **Firebase Auth** - Sistem autentikasi yang aman dan terpercaya
+### 🔐 Security
+- **Dual Authentication** - Separate login for customers and agents
+- **Role-Based Access** - Access restrictions based on roles
+- **Agent Key System** - Additional verification for agents
+- **Firebase Auth** - Secure and trusted authentication system
 
 ---
 
 ## 🛠 Tech Stack
 
 ### Frontend
-
 - **[Next.js 14](https://nextjs.org/)** - React framework untuk production
 - **[React 18](https://react.dev/)** - Library UI modern
 - **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
 - **[Lucide Icons](https://lucide.dev/)** - Icon set yang clean
 
 ### Backend & Database
-
 - **[Firebase Authentication](https://firebase.google.com/products/auth)** - Autentikasi user yang aman
 - **[Cloud Firestore](https://firebase.google.com/products/firestore)** - NoSQL database real-time
 - **[Firebase Admin SDK](https://firebase.google.com/docs/admin/setup)** - Server-side operations
 
 ### AI & Machine Learning
-
 - **AI Classification** - Klasifikasi otomatis kategori tiket
 - **Sentiment Analysis** - Analisis emosi pelanggan
 - **Smart Suggestions** - Rekomendasi respons berbasis AI
 
 ### Development Tools
-
 - **[ESLint](https://eslint.org/)** - Code linting
 - **[Prettier](https://prettier.io/)** - Code formatting
 - **[Firebase CLI](https://firebase.google.com/docs/cli)** - Deployment tools
@@ -97,9 +90,9 @@ Before you begin, ensure you have the following installed:
 - **[Node.js](https://nodejs.org/)** version 18 or higher
 - **[npm](https://www.npmjs.com/)** or **[yarn](https://yarnpkg.com/)**
 - **[Firebase Project](https://firebase.google.com/)** with:
-    - Firestore Database enabled
-    - Authentication enabled (Email/Password & Google Sign-in)
-    - Firebase Admin SDK credentials
+  - Firestore Database enabled
+  - Authentication enabled (Email/Password & Google Sign-in)
+  - Firebase Admin SDK credentials
 
 ### Installation
 
@@ -153,16 +146,16 @@ AGENT_KEY=support-agent-key-2026-secure
 4. Scroll down to **"Your apps"** section
 5. Select your web app (or create new by clicking **"Add app"** → **Web**)
 6. Copy the config values displayed:
-    ```javascript
-    const firebaseConfig = {
-        apiKey: '...', // → NEXT_PUBLIC_FIREBASE_API_KEY
-        authDomain: '...', // → NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-        projectId: '...', // → NEXT_PUBLIC_FIREBASE_PROJECT_ID
-        storageBucket: '...', // → NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-        messagingSenderId: '...', // → NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-        appId: '...', // → NEXT_PUBLIC_FIREBASE_APP_ID
-    }
-    ```
+   ```javascript
+   const firebaseConfig = {
+     apiKey: "...",              // → NEXT_PUBLIC_FIREBASE_API_KEY
+     authDomain: "...",          // → NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+     projectId: "...",           // → NEXT_PUBLIC_FIREBASE_PROJECT_ID
+     storageBucket: "...",       // → NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+     messagingSenderId: "...",   // → NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+     appId: "..."                // → NEXT_PUBLIC_FIREBASE_APP_ID
+   };
+   ```
 
 #### B. Firebase Admin SDK Credentials
 
@@ -170,13 +163,13 @@ AGENT_KEY=support-agent-key-2026-secure
 2. Click **"Generate new private key"**
 3. Download the JSON file
 4. Open the JSON file and extract the following values:
-    ```json
-    {
-        "project_id": "...", // → FIREBASE_PROJECT_ID
-        "private_key": "...", // → FIREBASE_PRIVATE_KEY
-        "client_email": "..." // → FIREBASE_CLIENT_EMAIL
-    }
-    ```
+   ```json
+   {
+     "project_id": "...",           // → FIREBASE_PROJECT_ID
+     "private_key": "...",          // → FIREBASE_PRIVATE_KEY
+     "client_email": "..."          // → FIREBASE_CLIENT_EMAIL
+   }
+   ```
 5. ⚠️ **Important**: Keep the private key format with `\n` characters for line breaks
 
 #### C. Agent Key
@@ -205,57 +198,57 @@ Navigate to [http://localhost:3001](http://localhost:3001)
 ### For Customers
 
 1. **Access the Platform**
-    - Open the website in your browser
-    - Click **"Continue as Customer"** button
+   - Open the website in your browser
+   - Click **"Continue as Customer"** button
 
 2. **Login or Register**
-    - Use email & password, or
-    - Sign in with Google account
+   - Use email & password, or
+   - Sign in with Google account
 
 3. **Create Support Ticket**
-    - Click **"Create New Request"** button
-    - Fill in the form:
-        - **Subject**: Brief title of your issue
-        - **Category**: Select category (Technical Issue, Billing, etc.)
-        - **Description**: Explain your problem in detail
-    - Click **Submit**
+   - Click **"Create New Request"** button
+   - Fill in the form:
+     - **Subject**: Brief title of your issue
+     - **Category**: Select category (Technical Issue, Billing, etc.)
+     - **Description**: Explain your problem in detail
+   - Click **Submit**
 
 4. **Track Your Tickets**
-    - View all your tickets in the dashboard
-    - Click on a ticket to see details and chat with agents
-    - Get notifications when there are updates
+   - View all your tickets in the dashboard
+   - Click on a ticket to see details and chat with agents
+   - Get notifications when there are updates
 
 ### For Support Agents
 
 1. **Agent Login**
-    - Click **"Continue as Agent"** button
-    - Enter:
-        - Email
-        - Password
-        - **Agent Key** (special key for agents)
+   - Click **"Continue as Agent"** button
+   - Enter:
+     - Email
+     - Password
+     - **Agent Key** (special key for agents)
 
 2. **Agent Dashboard**
-    - View all incoming tickets
-    - Filter by:
-        - Status (Open, In Progress, Resolved)
-        - Priority (Low, Medium, High, Urgent)
-        - Category
+   - View all incoming tickets
+   - Filter by:
+     - Status (Open, In Progress, Resolved)
+     - Priority (Low, Medium, High, Urgent)
+     - Category
 
 3. **Manage Tickets**
-    - Click on a ticket to view details
-    - Review AI analysis:
-        - Auto-categorization
-        - Priority level
-        - Customer sentiment
-    - Use AI-suggested responses
-    - Reply to customer messages
-    - Update ticket status
+   - Click on a ticket to view details
+   - Review AI analysis:
+     - Auto-categorization
+     - Priority level
+     - Customer sentiment
+   - Use AI-suggested responses
+   - Reply to customer messages
+   - Update ticket status
 
 4. **AI Features**
-    - **Auto-Classification**: System automatically categorizes tickets
-    - **Priority Detection**: AI determines urgency level
-    - **Sentiment Analysis**: Understand customer emotions (positive, neutral, negative)
-    - **Response Suggestions**: Get AI-generated reply drafts
+   - **Auto-Classification**: System automatically categorizes tickets
+   - **Priority Detection**: AI determines urgency level
+   - **Sentiment Analysis**: Understand customer emotions (positive, neutral, negative)
+   - **Response Suggestions**: Get AI-generated reply drafts
 
 ---
 
@@ -340,47 +333,43 @@ Contributions are welcome! Here's how you can help:
 ### How to Contribute
 
 1. **Fork the repository**
-    - Click the "Fork" button at the top right of this page
+   - Click the "Fork" button at the top right of this page
 
 2. **Clone your fork**
-
-    ```bash
-    git clone https://github.com/YOUR-USERNAME/ai-customerservice.git
-    cd ai-customerservice
-    ```
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/ai-customerservice.git
+   cd ai-customerservice
+   ```
 
 3. **Create a new branch**
-
-    ```bash
-    git checkout -b feature/amazing-feature
-    # or
-    git checkout -b fix/bug-fix
-    ```
+   ```bash
+   git checkout -b feature/amazing-feature
+   # or
+   git checkout -b fix/bug-fix
+   ```
 
 4. **Make your changes**
-    - Write clean, readable code
-    - Follow the existing code style
-    - Add comments where necessary
-    - Test your changes thoroughly
+   - Write clean, readable code
+   - Follow the existing code style
+   - Add comments where necessary
+   - Test your changes thoroughly
 
 5. **Commit your changes**
-
-    ```bash
-    git add .
-    git commit -m "Add some amazing feature"
-    ```
+   ```bash
+   git add .
+   git commit -m "Add some amazing feature"
+   ```
 
 6. **Push to your fork**
-
-    ```bash
-    git push origin feature/amazing-feature
-    ```
+   ```bash
+   git push origin feature/amazing-feature
+   ```
 
 7. **Open a Pull Request**
-    - Go to the original repository
-    - Click "New Pull Request"
-    - Select your branch
-    - Describe your changes in detail
+   - Go to the original repository
+   - Click "New Pull Request"
+   - Select your branch
+   - Describe your changes in detail
 
 ### Contribution Guidelines
 
@@ -411,16 +400,15 @@ Contributions are welcome! Here's how you can help:
 
 ---
 
-## 📄 Lisensi
+## 📄 License
 
-Proyek ini dilisensikan di bawah MIT License.
+This project is licensed under the MIT License.
 
 ---
 
 ## 👨‍💻 Author
 
 **Raharinda**
-
 - GitHub: [@Raharinda](https://github.com/Raharinda)
 
 ---
