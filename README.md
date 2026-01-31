@@ -1,78 +1,124 @@
-# AI-Powered Customer Service
+# AI-Powered Customer Service Platform
 
-AI-powered customer service platform with automatic message analysis, issue classification, sentiment understanding, and intelligent response suggestions.
+> Platform layanan pelanggan berbasis AI dengan analisis pesan otomatis, klasifikasi masalah, pemahaman sentimen, dan saran respons cerdas.
 
-## 🎯 Latest Update: Unified TICKETS System (January 2026)
-
-**Masalah yang Diperbaiki:**
-- ✅ Pesan dari customer tidak muncul di agent dashboard (FIXED)
-- ✅ Sistem memiliki 2 struktur berbeda (REQUEST & TICKET) yang tidak terhubung
-- ✅ Performance lambat (5-12 detik) untuk load dashboard
-
-**Solusi yang Diimplementasikan:**
-- ✅ Unified sistem ke **TICKETS-only** dengan struktur optimal
-- ✅ Denormalized data untuk fast reads (no joins!)
-- ✅ Counter fields untuk instant counts (no subcollection queries!)
-- ✅ Indexed queries untuk sorting & filtering (< 2 detik)
-- ✅ Migration script untuk data lama
-- ✅ Complete documentation & tools
-
-**Performance Improvement:**
-```
-Dashboard Load:  12s → < 2s  (6x faster!)
-Filter Switch:   7s → < 1s   (7x faster!)
-Message Count:   Query → Instant (counter field)
-Scalability:     Limited → 100k+ tickets
-```
-
-📚 **Dokumentasi Lengkap:** Lihat section [Unified TICKETS System](#unified-tickets-system) di bawah.
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://reactjs.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-10-orange?style=flat-square&logo=firebase)](https://firebase.google.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 
 ---
 
-## Features
+## 📑 Table of Contents
 
-- 🔐 **Dual Authentication System**
-  - Customer login at `/login` (email/password or Google)
-  - Support Agent login at `/agent` (email/password + agent key)
-  - Separate API endpoints for security
-- 👥 **Role-Based Access Control**
-  - Customer dashboard for submitting support requests
-  - Agent dashboard with AI-powered tools
-  - Automatic role-based routing
-- 🤖 **AI-Powered Tools** (for agents)
-  - Conversation analysis
-  - Issue classification
-  - Sentiment analysis
-  - Response suggestions
-- 🎫 **Unified TICKETS System** (NEW!)
-  - Single source of truth untuk semua customer interactions
-  - Optimized database structure dengan denormalization
-  - Fast queries dengan composite indexes
-  - Counter fields untuk instant statistics
-  - Scalable architecture
+- [Tentang Proyek](#-tentang-proyek)
+- [Fitur Utama](#-fitur-utama)
+- [Tech Stack](#-tech-stack)
+- [Cara Penggunaan](#-cara-penggunaan)
+- [Screenshot](#-screenshot)
+- [Lisensi](#-lisensi)
 
-## Getting Started
+---
+
+## 📖 Tentang Proyek
+
+**AI-Powered Customer Service** adalah platform layanan pelanggan modern yang memanfaatkan kecerdasan buatan untuk membantu bisnis memberikan support yang lebih cepat dan efisien. Platform ini dirancang dengan dua portal terpisah: satu untuk pelanggan dan satu untuk agent support.
+
+### Mengapa Proyek Ini?
+
+- **Otomasi Cerdas**: AI membantu mengklasifikasikan dan memprioritaskan tiket secara otomatis
+- **Respon Lebih Cepat**: Agent mendapat saran jawaban dari AI
+- **Pengalaman Terbaik**: Interface yang clean dan mudah digunakan
+- **Skalabilitas**: Mampu menangani ribuan tiket dengan performa optimal
+
+---
+
+## ✨ Fitur Utama
+
+### 👤 Portal Pelanggan
+
+- 📝 **Buat Tiket Support** - Submit masalah dengan kategori yang jelas
+- 💬 **Real-time Chat** - Komunikasi langsung dengan agent
+- 📊 **Tracking Status** - Pantau progress tiket Anda
+- 🔔 **Notifikasi** - Dapatkan update saat ada balasan
+
+### 👨‍💼 Portal Agent
+
+- 🎫 **Dashboard Terpadu** - Kelola semua tiket dalam satu tempat
+- 🤖 **AI Assistant** - Saran respons otomatis berbasis AI
+- 🏷️ **Auto-Classification** - Kategori dan prioritas otomatis
+- 😊 **Sentiment Analysis** - Deteksi emosi pelanggan
+- 📈 **Analytics** - Statistik dan laporan performa
+
+### 🔐 Keamanan
+
+- **Autentikasi Ganda** - Login terpisah untuk customer dan agent
+- **Role-Based Access** - Pembatasan akses berdasarkan peran
+- **Agent Key System** - Verifikasi tambahan untuk agent
+- **Firebase Auth** - Sistem autentikasi yang aman dan terpercaya
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+- **[Next.js 14](https://nextjs.org/)** - React framework untuk production
+- **[React 18](https://react.dev/)** - Library UI modern
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[Lucide Icons](https://lucide.dev/)** - Icon set yang clean
+
+### Backend & Database
+
+- **[Firebase Authentication](https://firebase.google.com/products/auth)** - Autentikasi user yang aman
+- **[Cloud Firestore](https://firebase.google.com/products/firestore)** - NoSQL database real-time
+- **[Firebase Admin SDK](https://firebase.google.com/docs/admin/setup)** - Server-side operations
+
+### AI & Machine Learning
+
+- **AI Classification** - Klasifikasi otomatis kategori tiket
+- **Sentiment Analysis** - Analisis emosi pelanggan
+- **Smart Suggestions** - Rekomendasi respons berbasis AI
+
+### Development Tools
+
+- **[ESLint](https://eslint.org/)** - Code linting
+- **[Prettier](https://prettier.io/)** - Code formatting
+- **[Firebase CLI](https://firebase.google.com/docs/cli)** - Deployment tools
+
+---
+
+## 🏁 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- Firebase project with Firestore and Authentication enabled
-- Firebase Admin SDK credentials
+Before you begin, ensure you have the following installed:
+
+- **[Node.js](https://nodejs.org/)** version 18 or higher
+- **[npm](https://www.npmjs.com/)** or **[yarn](https://yarnpkg.com/)**
+- **[Firebase Project](https://firebase.google.com/)** with:
+    - Firestore Database enabled
+    - Authentication enabled (Email/Password & Google Sign-in)
+    - Firebase Admin SDK credentials
 
 ### Installation
 
-1. Clone the repository:
+**1. Clone the repository**
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/Raharinda/ai-customerservice.git
 cd ai-customerservice
 ```
 
-2. Install dependencies:
+**2. Install dependencies**
+
 ```bash
 npm install
+# or
+yarn install
 ```
 
-3. Setup environment variables:
+**3. Setup Environment Variables**
 
 Create a `.env.local` file in the root directory:
 
@@ -97,372 +143,292 @@ PORT=3001
 AGENT_KEY=support-agent-key-2026-secure
 ```
 
-4. Run the development server:
+### 📝 How to Get Firebase Credentials
+
+#### A. Firebase Web Config (`NEXT_PUBLIC_*` variables)
+
+1. Open [Firebase Console](https://console.firebase.google.com/)
+2. Select your project
+3. Click ⚙️ (Settings) → **Project Settings**
+4. Scroll down to **"Your apps"** section
+5. Select your web app (or create new by clicking **"Add app"** → **Web**)
+6. Copy the config values displayed:
+    ```javascript
+    const firebaseConfig = {
+        apiKey: '...', // → NEXT_PUBLIC_FIREBASE_API_KEY
+        authDomain: '...', // → NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        projectId: '...', // → NEXT_PUBLIC_FIREBASE_PROJECT_ID
+        storageBucket: '...', // → NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        messagingSenderId: '...', // → NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+        appId: '...', // → NEXT_PUBLIC_FIREBASE_APP_ID
+    }
+    ```
+
+#### B. Firebase Admin SDK Credentials
+
+1. In Firebase Console, go to **Project Settings** → **Service Accounts** tab
+2. Click **"Generate new private key"**
+3. Download the JSON file
+4. Open the JSON file and extract the following values:
+    ```json
+    {
+        "project_id": "...", // → FIREBASE_PROJECT_ID
+        "private_key": "...", // → FIREBASE_PRIVATE_KEY
+        "client_email": "..." // → FIREBASE_CLIENT_EMAIL
+    }
+    ```
+5. ⚠️ **Important**: Keep the private key format with `\n` characters for line breaks
+
+#### C. Agent Key
+
+- Default: `support-agent-key-2026-secure`
+- ⚠️ **CHANGE THIS IN PRODUCTION!**
+- Use a strong, random string (recommended: 32+ characters)
+- Example: `your-super-secret-agent-key-2026-change-me`
+
+**4. Run the development server**
+
 ```bash
 npm run dev
+# or
+yarn dev
 ```
 
-5. Open [http://localhost:3001](http://localhost:3001) in your browser.
+**5. Open your browser**
 
-## Agent Key Setup
-
-The application uses an **Agent Key** system to authenticate support agents. See [AGENT_KEY_SETUP.md](./AGENT_KEY_SETUP.md) for detailed instructions.
-
-### Quick Start:
-
-**Customer Login:**
-- Navigate to `/login` or click "Continue as Customer" from homepage
-- Login with email/password or Google
-- Redirects to `/customer` dashboard
-
-**Support Agent Login:**
-- Navigate to `/agent` or click "Continue as Agent" from homepage
-- Enter email, password, AND agent key
-- Default agent key: `support-agent-key-2026-secure` (change in production!)
-- Redirects to `/agent/dashboard`
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── agent/
-│   │   ├── page.js           # Agent login page
-│   │   └── dashboard/
-│   │       └── page.js       # Agent dashboard (protected)
-│   ├── (public)/
-│   │   ├── customer/         # Customer dashboard
-│   │   ├── login/            # Customer login page
-│   │   └── register/         # Registration page
-│   └── api/
-│       └── auth/
-│           ├── login/        # Customer login API
-│           └── agent/
-│               └── login/    # Agent login API (with key)
-├── components/
-│   └── auth/                 # Auth components (LoginForm, etc.)
-├── contexts/
-│   └── AuthContext.js        # Authentication context
-└── lib/
-    ├── firebase.js           # Firebase client config
-    └── firebaseAdmin.js      # Firebase Admin SDK config
-```
-
-## Authentication Flow
-
-```
-User → Homepage
-  ├─> Customer
-  │     ├─> Navigate to /login
-  │     ├─> Email/Password or Google
-  │     ├─> API: /api/auth/login
-  │     └─> Redirect to /customer
-  │
-  └─> Support Agent
-        ├─> Navigate to /agent
-        ├─> Email/Password + Agent Key
-        ├─> API: /api/auth/agent/login
-        ├─> Verify agent key
-        ├─> Update role to 'agent'
-        └─> Redirect to /agent/dashboard
-```
-
-## Security
-
-- ✅ Separate login endpoints for customer and agent
-- ✅ Agent key verification on dedicated endpoint
-- ✅ Role-based access control
-- ✅ Firebase Authentication integration
-- ✅ Server-side token verification
-- ✅ Automatic role assignment
-- ✅ Security isolation between customer and agent flows
-
-**Important:** Always use strong, random agent keys in production and rotate them regularly!
-
-## API Routes
-
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - Customer login
-- `POST /api/auth/agent/login` - Agent login with key verification
-- `POST /api/auth/verify` - Token verification
-
-## Technologies
-
-- **Frontend:** Next.js 14, React, Tailwind CSS
-- **Authentication:** Firebase Authentication
-- **Database:** Cloud Firestore (with optimized indexes)
-- **Backend:** Next.js API Routes, Firebase Admin SDK
+Navigate to [http://localhost:3001](http://localhost:3001)
 
 ---
 
-## 🎫 Unified TICKETS System
+## 🎯 How to Use
 
-### Apa yang Berubah?
+### For Customers
 
-#### **Sebelumnya (Sistem Lama):**
+1. **Access the Platform**
+    - Open the website in your browser
+    - Click **"Continue as Customer"** button
+
+2. **Login or Register**
+    - Use email & password, or
+    - Sign in with Google account
+
+3. **Create Support Ticket**
+    - Click **"Create New Request"** button
+    - Fill in the form:
+        - **Subject**: Brief title of your issue
+        - **Category**: Select category (Technical Issue, Billing, etc.)
+        - **Description**: Explain your problem in detail
+    - Click **Submit**
+
+4. **Track Your Tickets**
+    - View all your tickets in the dashboard
+    - Click on a ticket to see details and chat with agents
+    - Get notifications when there are updates
+
+### For Support Agents
+
+1. **Agent Login**
+    - Click **"Continue as Agent"** button
+    - Enter:
+        - Email
+        - Password
+        - **Agent Key** (special key for agents)
+
+2. **Agent Dashboard**
+    - View all incoming tickets
+    - Filter by:
+        - Status (Open, In Progress, Resolved)
+        - Priority (Low, Medium, High, Urgent)
+        - Category
+
+3. **Manage Tickets**
+    - Click on a ticket to view details
+    - Review AI analysis:
+        - Auto-categorization
+        - Priority level
+        - Customer sentiment
+    - Use AI-suggested responses
+    - Reply to customer messages
+    - Update ticket status
+
+4. **AI Features**
+    - **Auto-Classification**: System automatically categorizes tickets
+    - **Priority Detection**: AI determines urgency level
+    - **Sentiment Analysis**: Understand customer emotions (positive, neutral, negative)
+    - **Response Suggestions**: Get AI-generated reply drafts
+
+---
+
+## 📁 Project Structure
+
 ```
-❌ DUA sistem terpisah:
-   - REQUESTS (customer form) → collection 'requests' + root 'messages'
-   - TICKETS (ticketing) → collection 'tickets' + subcollection 'messages'
-
-❌ Agent dashboard HANYA baca TICKETS
-   → Pesan dari REQUEST tidak muncul!
-
-❌ Performance lambat:
-   - Dashboard load: 5-12 detik
-   - Filter switch: 4-7 detik
-   - Message counting: Perlu query subcollection
-```
-
-#### **Sekarang (Sistem Baru):**
-```
-✅ SATU sistem unified: TICKETS
-   - Semua customer interactions → tickets/{ticketId}
-   - Messages → tickets/{ticketId}/messages (subcollection)
-
-✅ Agent dashboard baca semua sources
-   - Tickets dari ticketing system
-   - Requests yang di-migrate ke tickets
-   - Semua muncul di satu dashboard!
-
-✅ Performance optimal:
-   - Dashboard load: < 2 detik (6x faster!)
-   - Filter switch: < 1 detik (7x faster!)
-   - Message counting: INSTANT (counter fields)
+ai-customerservice/
+├── src/
+│   ├── app/
+│   │   ├── agent/
+│   │   │   ├── page.js                    # Agent login page
+│   │   │   └── dashboard/
+│   │   │       └── page.js                # Agent dashboard (protected)
+│   │   ├── (public)/
+│   │   │   ├── customer/                  # Customer dashboard
+│   │   │   ├── login/                     # Customer login page
+│   │   │   └── register/                  # Registration page
+│   │   └── api/
+│   │       └── auth/
+│   │           ├── login/                 # Customer login API
+│   │           ├── register/              # Registration API
+│   │           └── agent/
+│   │               └── login/             # Agent login API (with key)
+│   ├── components/
+│   │   └── auth/                          # Auth components (LoginForm, etc.)
+│   ├── contexts/
+│   │   └── AuthContext.js                 # Authentication context
+│   └── lib/
+│       ├── firebase.js                    # Firebase client config
+│       └── firebaseAdmin.js               # Firebase Admin SDK config
+├── public/                                 # Static assets
+├── .env.local                             # Environment variables (create this)
+├── package.json                           # Project dependencies
+└── README.md                              # This file
 ```
 
 ---
 
-### Database Structure (Optimized)
+## 🔐 Authentication Flow
+
+### Customer Login Flow
 
 ```
-tickets/{ticketId}/
-  ├── subject           (string)
-  ├── description       (string)
-  ├── category          (string) - Technical Issue, Billing, etc.
-  ├── status            (string) - open, in-progress, resolved, closed
-  ├── priority          (string) - low, medium, high, urgent
-  │
-  ├── customerId        (string)
-  ├── customerName      (string) ← DENORMALIZED (fast reads!)
-  ├── customerEmail     (string) ← DENORMALIZED (no joins!)
-  │
-  ├── assignedTo        (string) - Agent ID
-  │
-  ├── createdAt         (timestamp)
-  ├── updatedAt         (timestamp)
-  ├── lastMessageAt     (timestamp) ← For sorting (indexed!)
-  │
-  ├── messageCount      (number) ← COUNTER (instant!)
-  ├── unreadCount       (number) ← COUNTER (instant!)
-  │
-  └── messages/ (subcollection)
-      └── {messageId}/
-          ├── senderId
-          ├── senderName
-          ├── senderEmail
-          ├── senderRole    (customer | agent | system)
-          ├── message
-          ├── createdAt
-          └── read          (boolean)
+User → Homepage → "Continue as Customer"
+  ↓
+Navigate to /login
+  ↓
+Choose login method:
+  • Email/Password
+  • Google OAuth
+  ↓
+API: POST /api/auth/login
+  ↓
+Redirect to /customer (Customer Dashboard)
 ```
 
-**Key Optimizations:**
+### Agent Login Flow
 
-1. **Denormalization** - Customer data ada di ticket doc (tidak perlu join!)
-2. **Counter Fields** - messageCount & unreadCount (tidak perlu count subcollection!)
-3. **Indexed Timestamps** - lastMessageAt untuk sorting (database-level, super fast!)
-4. **Subcollections** - Messages terorganisir, tidak batas 1MB per document
-
----
-
-### API Endpoints (Updated)
-
-#### Customer Endpoints:
-```javascript
-// Create new ticket (menggantikan /api/request)
-POST /api/tickets/create
-Body: {
-  subject: string,
-  message: string,
-  category: string,
-  priority?: string,
-  idToken?: string
-}
-Response: { ticketId, ticket: {...} }
-
-// Get ticket messages
-GET /api/tickets/{ticketId}/messages
-Response: { messages: [...] }
-
-// Send message to ticket
-POST /api/tickets/{ticketId}/messages
-Body: { message, idToken?, senderName?, senderRole? }
 ```
-
-#### Agent Endpoints:
-```javascript
-// Get all tickets (OPTIMIZED with indexes)
-GET /api/agent/tickets?filter=all&limit=50
-Filters: all | unread | open | in-progress | resolved
-Response: { tickets: [...], stats: {...} }
-
-// Legacy endpoint (masih berfungsi, hybrid)
-GET /api/agent/messages?filter=all
-Response: { messages: [...] } // Gabungan tickets + old requests
+User → Homepage → "Continue as Agent"
+  ↓
+Navigate to /agent
+  ↓
+Enter credentials:
+  • Email
+  • Password
+  • Agent Key (default: support-agent-key-2026-secure)
+  ↓
+API: POST /api/auth/agent/login
+  ↓
+Verify agent key & update role to 'agent'
+  ↓
+Redirect to /agent/dashboard (Agent Dashboard)
 ```
 
 ---
 
-### Setup Instructions
+## 🤝 Contributing
 
-#### 1. **Deploy Firestore Indexes** (WAJIB!)
+Contributions are welcome! Here's how you can help:
 
-Tanpa indexes, query akan lambat atau error.
+### How to Contribute
 
-**Option A: Auto-deploy via Firebase CLI**
-```bash
-# Install Firebase CLI
-npm install -g firebase-tools
+1. **Fork the repository**
+    - Click the "Fork" button at the top right of this page
 
-# Login
-firebase login
+2. **Clone your fork**
 
-# Deploy indexes
-firebase deploy --only firestore:indexes
-```
+    ```bash
+    git clone https://github.com/YOUR-USERNAME/ai-customerservice.git
+    cd ai-customerservice
+    ```
 
-**Option B: Manual via Firebase Console**
-1. Jalankan app dan trigger query
-2. Jika muncul index error, klik URL yang disediakan
-3. Tunggu 5-10 menit sampai index selesai build
+3. **Create a new branch**
 
-**Verify:** Firebase Console → Firestore → Indexes tab
+    ```bash
+    git checkout -b feature/amazing-feature
+    # or
+    git checkout -b fix/bug-fix
+    ```
 
-#### 2. **Update Customer Form** (Optional)
+4. **Make your changes**
+    - Write clean, readable code
+    - Follow the existing code style
+    - Add comments where necessary
+    - Test your changes thoroughly
 
-Untuk menggunakan endpoint baru:
+5. **Commit your changes**
 
-File: `src/app/(public)/customer/_components/FormRequest.js`
+    ```bash
+    git add .
+    git commit -m "Add some amazing feature"
+    ```
 
-```javascript
-// Ganti endpoint:
-const res = await fetch('/api/tickets/create', {  // ← Changed from /api/request
-    method: 'POST',
-    body: JSON.stringify({
-        subject: data.subject,
-        category: data.category,
-        message: data.description,  // ← Changed from 'description'
-        idToken,
-        priority: 'medium',
-    }),
-})
-```
+6. **Push to your fork**
 
-#### 3. **Migration Data Lama** (Optional)
+    ```bash
+    git push origin feature/amazing-feature
+    ```
 
-Jika Anda punya data di `requests` collection:
+7. **Open a Pull Request**
+    - Go to the original repository
+    - Click "New Pull Request"
+    - Select your branch
+    - Describe your changes in detail
 
-```bash
-# 1. Download Firebase credentials
-# Firebase Console → Project Settings → Service Accounts → Generate new private key
-# Save as serviceAccountKey.json di root project
+### Contribution Guidelines
 
-# 2. Install dependency
-npm install firebase-admin
+- **Code Style**: Follow the existing code formatting
+- **Commits**: Write clear, descriptive commit messages
+- **Testing**: Test your changes before submitting
+- **Documentation**: Update README if you add new features
+- **Issues**: Check existing issues before creating new ones
 
-# 3. Dry run (test tanpa changes)
-node scripts/migrate-requests-to-tickets.js
+### Areas to Contribute
 
-# 4. Jika OK, edit script: dryRun: false, lalu run lagi
-node scripts/migrate-requests-to-tickets.js
-```
-
----
-
-### Performance Benchmarks
-
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Dashboard load | 5-12s | < 2s | **6x faster** |
-| Filter switch | 4-7s | < 1s | **7x faster** |
-| Message count | Query needed | Instant | **∞ faster** |
-| Sort operation | Client-side | Database | **10x faster** |
-| Scalability | ~10k tickets | 100k+ | **10x more** |
+- 🐛 Bug fixes
+- ✨ New features
+- 📝 Documentation improvements
+- 🎨 UI/UX enhancements
+- ♿ Accessibility improvements
+- 🌐 Translations/i18n
+- ⚡ Performance optimizations
 
 ---
 
-### Testing
-
-**Manual Test via Browser:**
-1. Buka `http://localhost:3000/agent/dashboard`
-2. Login sebagai agent
-3. Pesan dari customer seharusnya muncul
-4. Test filter: All, Unread, Today
-5. Klik pesan → Lihat detail → Reply
-
-**Automated Test:**
-```bash
-# Node.js test script (requires Node 18+)
-node test-tickets-api.js
-
-# Or bash script (requires jq)
-bash test-tickets-system.sh
-```
-
----
-
-### Troubleshooting
-
-**❌ Index not found error:**
-```
-Solution:
-1. Klik URL di error message
-2. Atau: firebase deploy --only firestore:indexes
-3. Tunggu 5-10 menit
-```
-
-**❌ Pesan tidak muncul:**
-```
-Solution:
-1. Check Firebase Console → Firestore
-2. Verify data ada di 'tickets' collection
-3. Check messages ada di subcollection
-4. Verify indexes sudah "Enabled"
-```
-
-**❌ Performance masih lambat:**
-```
-Solution:
-1. Verify indexes sudah build
-2. Check browser console untuk errors
-3. Test dengan limit kecil dulu (limit=10)
-4. Monitor Firebase usage quota
-```
-
----
-
-### Documentation Files
-
-Untuk detail lengkap, lihat:
-
-- **`IMPLEMENTATION_GUIDE.md`** - Step-by-step implementation
-- **`MIGRATION_PLAN.md`** - Migration strategy & timeline
-- **`FIRESTORE_INDEXES.md`** - Index configuration details
-- **`FIX_AGENT_MESSAGES.md`** - Penjelasan masalah & solusi
-- **`firestore.indexes.json`** - Index config file
-- **`scripts/migrate-requests-to-tickets.js`** - Migration script
-
----
-
-## Learn More
+## 📖 Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev/)
 - [Firebase Documentation](https://firebase.google.com/docs)
-- [Firestore Indexes Best Practices](https://firebase.google.com/docs/firestore/query-data/indexing)
-- [Agent Key Setup Guide](./AGENT_KEY_SETUP.md)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
-## License
+---
 
-This project is licensed under the MIT License.
+## 📄 Lisensi
 
+Proyek ini dilisensikan di bawah MIT License.
+
+---
+
+## 👨‍💻 Author
+
+**Raharinda**
+
+- GitHub: [@Raharinda](https://github.com/Raharinda)
+
+---
+
+<div align="center">
+
+**⭐ If you find this project helpful, please give it a star! ⭐**
+
+Made with ❤️ by [Raharinda](https://github.com/Raharinda)
+
+</div>
