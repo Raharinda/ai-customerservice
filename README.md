@@ -452,6 +452,4 @@ This project is licensed under the MIT License.
 
 **⭐ If you find this project helpful, please give it a star! ⭐**
 
-Made with ❤️ by [Raharinda](https://github.com/Raharinda)
-
 </div>
