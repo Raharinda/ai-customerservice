@@ -59,20 +59,21 @@
 ## 🛠 Tech Stack
 
 ### Frontend
-- **[Next.js 14](https://nextjs.org/)** - React framework untuk production
-- **[React 18](https://react.dev/)** - Library UI modern
+- **[Next.js 14](https://nextjs.org/)** - React framework for production
+- **[React 18](https://react.dev/)** - Modern UI library
 - **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[Lucide Icons](https://lucide.dev/)** - Icon set yang clean
+- **[Lucide Icons](https://lucide.dev/)** - Clean icon set
 
 ### Backend & Database
-- **[Firebase Authentication](https://firebase.google.com/products/auth)** - Autentikasi user yang aman
-- **[Cloud Firestore](https://firebase.google.com/products/firestore)** - NoSQL database real-time
+- **[Firebase Authentication](https://firebase.google.com/products/auth)** - Secure user authentication
+- **[Cloud Firestore](https://firebase.google.com/products/firestore)** - Real-time NoSQL database
 - **[Firebase Admin SDK](https://firebase.google.com/docs/admin/setup)** - Server-side operations
 
 ### AI & Machine Learning
-- **AI Classification** - Klasifikasi otomatis kategori tiket
-- **Sentiment Analysis** - Analisis emosi pelanggan
-- **Smart Suggestions** - Rekomendasi respons berbasis AI
+- **[Google Gemini AI](https://ai.google.dev/)** - Advanced AI for classification and analysis
+- **AI Classification** - Automatic ticket category classification
+- **Sentiment Analysis** - Customer emotion analysis
+- **Smart Suggestions** - AI-powered response recommendations
 
 ### Development Tools
 - **[ESLint](https://eslint.org/)** - Code linting
@@ -93,6 +94,10 @@ Before you begin, ensure you have the following installed:
   - Firestore Database enabled
   - Authentication enabled (Email/Password & Google Sign-in)
   - Firebase Admin SDK credentials
+- **[Gemini API Key](https://makersuite.google.com/app/apikey)** for AI features:
+  - Ticket classification
+  - Sentiment analysis
+  - Response suggestions
 
 ### Installation
 
@@ -128,6 +133,9 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:xxxxx
+
+# Gemini AI API
+GEMINI_API_KEY=your-gemini-api-key
 
 # Server Configuration
 PORT=3001
@@ -172,7 +180,27 @@ AGENT_KEY=support-agent-key-2026-secure
    ```
 5. ⚠️ **Important**: Keep the private key format with `\n` characters for line breaks
 
-#### C. Agent Key
+#### C. Gemini API Key
+
+1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Click **"Get API Key"** or **"Create API Key"**
+3. Select your Google Cloud project (or create a new one)
+4. Click **"Create API key in existing project"** or **"Create API key in new project"**
+5. Copy the generated API key
+6. Paste it into your `.env.local` file as `GEMINI_API_KEY`
+
+**What is Gemini API used for?**
+- AI-powered ticket classification
+- Sentiment analysis of customer messages
+- Automatic response suggestions for agents
+- Priority detection based on message content
+
+⚠️ **Important Notes:**
+- Keep your API key secure and never commit it to version control
+- Gemini API has free tier limits (check [pricing](https://ai.google.dev/pricing))
+- Consider implementing rate limiting for production use
+
+#### D. Agent Key
 
 - Default: `support-agent-key-2026-secure`
 - ⚠️ **CHANGE THIS IN PRODUCTION!**
@@ -391,6 +419,59 @@ Contributions are welcome! Here's how you can help:
 
 ---
 
+## 📸 Screenshots
+
+### Customer Portal
+```
+┌─────────────────────────────────────┐
+│  🏠 Customer Dashboard              │
+├─────────────────────────────────────┤
+│  📝 My Tickets                      │
+│  ┌──────────────────────────────┐  │
+│  │ ⚡ Cannot Login to Account   │  │
+│  │ Status: Open | Priority: High│  │
+│  │ Created: 2 hours ago         │  │
+│  └──────────────────────────────┘  │
+│                                     │
+│  ┌──────────────────────────────┐  │
+│  │ 🔧 Feature Request           │  │
+│  │ Status: In Progress          │  │
+│  │ Created: Yesterday           │  │
+│  └──────────────────────────────┘  │
+│                                     │
+│  [+ Create New Request]             │
+└─────────────────────────────────────┘
+```
+
+### Agent Dashboard
+```
+┌─────────────────────────────────────┐
+│  👨‍💼 Agent Dashboard               │
+├─────────────────────────────────────┤
+│  Filters: [All] [Open] [Unread]    │
+│                                     │
+│  📊 Statistics                      │
+│  Total: 45 | Open: 12 | Urgent: 3  │
+│                                     │
+│  🎫 Recent Tickets                  │
+│  ┌──────────────────────────────┐  │
+│  │ 🔴 URGENT: Server Down       │  │
+│  │ Customer: john@email.com     │  │
+│  │ 🤖 AI: Technical Issue       │  │
+│  │ 😟 Sentiment: Frustrated     │  │
+│  └──────────────────────────────┘  │
+│                                     │
+│  ┌──────────────────────────────┐  │
+│  │ 🟡 Payment Not Processed     │  │
+│  │ Customer: jane@email.com     │  │
+│  │ 🤖 AI: Billing Question      │  │
+│  │ 😊 Sentiment: Neutral        │  │
+│  └──────────────────────────────┘  │
+└─────────────────────────────────────┘
+```
+
+---
+
 ## 📖 Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
@@ -403,6 +484,13 @@ Contributions are welcome! Here's how you can help:
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+---
+
+## 👨‍💻 Author
+
+**Raharinda**
+- GitHub: [@Raharinda](https://github.com/Raharinda)
 
 ---
 
