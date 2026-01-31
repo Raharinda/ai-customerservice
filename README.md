@@ -406,13 +406,6 @@ This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Author
-
-**Raharinda**
-- GitHub: [@Raharinda](https://github.com/Raharinda)
-
----
-
 <div align="center">
 
 **⭐ If you find this project helpful, please give it a star! ⭐**
